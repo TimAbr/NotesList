@@ -30,11 +30,17 @@ class NoteView @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
 
-    private var isImportant = false
-    private var isRead = false
-    private var titleText: String = ""
-    private var bodyText: String = ""
-    private var dateText: String = ""
+    var data: Note = Note(0, "", "")
+        set(value) {
+            field = value
+            formattedDate = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")
+                .withZone(ZoneId.systemDefault())
+                .format(value.timestamp)
+            requestLayout()
+            invalidate()
+        }
+
+    private var formattedDate: String = ""
 
     private var cornerRadius: Float = 0f
     private var noteElevation: Float = 0f
@@ -87,8 +93,9 @@ class NoteView @JvmOverloads constructor(
 
     private fun parseAttributes(attrs: AttributeSet?, defStyleAttr: Int) {
         context.withStyledAttributes(attrs, R.styleable.NoteView, defStyleAttr, R.style.NoteStyle) {
-            isRead = getBoolean(R.styleable.NoteView_isRead, false)
-            isImportant = getBoolean(R.styleable.NoteView_isImportant, false)
+            val isRead = getBoolean(R.styleable.NoteView_isRead, false)
+            val isImportant = getBoolean(R.styleable.NoteView_isImportant, false)
+            data = data.copy(isRead = isRead, isImportant = isImportant)
 
             cornerRadius = getDimension(R.styleable.NoteView_noteCornerRadius, 0f)
             noteElevation = getDimension(R.styleable.NoteView_noteElevation, 0f)
@@ -144,23 +151,9 @@ class NoteView @JvmOverloads constructor(
     }
 
     fun toggleReadState() {
-        isRead = !isRead
-        invalidate()
+        data = data.copy(isRead = !data.isRead)
     }
 
-    fun setNoteData(note: Note) {
-        titleText = note.title
-        bodyText = note.text
-        isImportant = note.isImportant
-        isRead = note.isRead
-
-        val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")
-            .withZone(ZoneId.systemDefault())
-        dateText = formatter.format(note.timestamp)
-
-        invalidate()
-        requestLayout()
-    }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         val widthSize = MeasureSpec.getSize(widthMeasureSpec)
@@ -175,7 +168,7 @@ class NoteView @JvmOverloads constructor(
         val headerHeight = titleTextSize + notePadding * 2f
 
         val textWidth = (desiredWidth - notePadding * 2).toInt().coerceAtLeast(0)
-        val staticLayout = createStaticLayout(bodyText, textWidth)
+        val staticLayout = createStaticLayout(data.text, textWidth)
 
         val fontMetrics = contentPaint.fontMetricsInt
         val singleLineHeight = fontMetrics.bottom - fontMetrics.top
@@ -199,10 +192,10 @@ class NoteView @JvmOverloads constructor(
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
-        val currentHeaderColor = if (isRead) readHeaderColor else unreadHeaderColor
-        val currentBgColor = if (isRead) readBgColor else unreadBgColor
-        val currentTitleColor = if (isRead) readTitleColor else unreadTitleColor
-        val currentContentColor = if (isRead) readTextColor else unreadTextColor
+        val currentHeaderColor = if (data.isRead) readHeaderColor else unreadHeaderColor
+        val currentBgColor = if (data.isRead) readBgColor else unreadBgColor
+        val currentTitleColor = if (data.isRead) readTitleColor else unreadTitleColor
+        val currentContentColor = if (data.isRead) readTextColor else unreadTextColor
 
         val w = width.toFloat()
         val h = height.toFloat()
@@ -231,18 +224,18 @@ class NoteView @JvmOverloads constructor(
         titlePaint.textSize = titleTextSize
 
         var titleX = padding
-        if (isImportant) {
+        if (data.isImportant) {
             drawImportantIcon(canvas, padding, headerH / 2)
             titleX += titlePaint.textSize * TITLE_X_OFFSET_RATIO
         }
 
         val titleY = (headerH / 2) - ((titlePaint.descent() + titlePaint.ascent()) / 2)
-        canvas.drawText(titleText, titleX, titleY, titlePaint)
+        canvas.drawText(data.title, titleX, titleY, titlePaint)
 
         contentPaint.color = currentContentColor
         contentPaint.textSize = bodyTextSize
 
-        val staticLayout = createStaticLayout(bodyText, (w - padding * 2)
+        val staticLayout = createStaticLayout(data.text, (w - padding * 2)
             .toInt()
             .coerceAtLeast(0))
 
@@ -262,8 +255,8 @@ class NoteView @JvmOverloads constructor(
         }
 
         contentPaint.textSize = dateTextSize
-        canvas.drawText(dateText, padding, h - padding, contentPaint)
-        if (isRead) drawReadIcon(
+        canvas.drawText(formattedDate, padding, h - padding, contentPaint)
+        if (data.isRead) drawReadIcon(
             canvas,
             w - padding * READ_ICON_X_PADDING_RATIO,
             h - padding * READ_ICON_Y_PADDING_RATIO

@@ -6,7 +6,7 @@ data class Note(
     val id: Long,
     val title: String,
     val text: String,
-    val timestamp: Instant,
+    val timestamp: Instant = Instant.now(),
     val isImportant: Boolean = false,
     val isRead: Boolean = false
 )
