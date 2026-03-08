@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="NoteStyle">
+        <item name="noteCornerRadius">8dp</item>
+        <item name="noteElevation">4dp</item>
+    </style>
+
+    <style name="NoteStyle.NotRead">
+        <item name="noteBackgroundColor">#FFFFFF</item>
+        <item name="noteTextColor">#000000</item>
+    </style>
+
+    <style name="NoteStyle.Read">
+        <item name="noteBackgroundColor">#F0F0F0</item>
+        <item name="noteTextColor">#888888</item>
+    </style>
+</resources>

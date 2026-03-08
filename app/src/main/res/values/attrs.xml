@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="NoteView">
+        <attr name="noteBackgroundColor" format="color" />
+        <attr name="noteTextColor" format="color" />
+        <attr name="noteCornerRadius" format="dimension" />
+        <attr name="noteElevation" format="dimension" />
+    </declare-styleable>
+</resources>
