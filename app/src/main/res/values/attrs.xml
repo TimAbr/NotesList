@@ -13,5 +13,7 @@
         <attr name="noteBodyTextSize" format="dimension" />
         <attr name="noteDateTextSize" format="dimension" />
         <attr name="notePadding" format="dimension" />
+        <attr name="noteReadStyle" format="reference" />
+        <attr name="noteUnreadStyle" format="reference" />
     </declare-styleable>
 </resources>

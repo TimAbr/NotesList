@@ -9,7 +9,9 @@ import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.Shader
 import android.graphics.Typeface
-import android.text.*
+import android.text.StaticLayout
+import android.text.TextPaint
+import android.text.TextUtils
 import android.util.AttributeSet
 import android.view.View
 import android.view.ViewOutlineProvider
@@ -91,25 +93,46 @@ class NoteView @JvmOverloads constructor(
             cornerRadius = getDimension(R.styleable.NoteView_noteCornerRadius, 0f)
             noteElevation = getDimension(R.styleable.NoteView_noteElevation, 0f)
 
-            unreadHeaderColor = getColor(R.styleable.NoteView_noteHeaderColor, Color.TRANSPARENT)
-            unreadBgColor = getColor(R.styleable.NoteView_noteBackgroundColor, Color.TRANSPARENT)
-            unreadTitleColor = getColor(R.styleable.NoteView_noteTitleColor, Color.BLACK)
-            unreadTextColor = getColor(R.styleable.NoteView_noteTextColor, Color.DKGRAY)
-
             titleTextSize = getDimension(R.styleable.NoteView_noteTitleTextSize, 0f)
             bodyTextSize = getDimension(R.styleable.NoteView_noteBodyTextSize, 0f)
             dateTextSize = getDimension(R.styleable.NoteView_noteDateTextSize, 0f)
             notePadding = getDimension(R.styleable.NoteView_notePadding, 0f)
+            
+            val readStyleId = getResourceId(R.styleable.NoteView_noteReadStyle, R.style.NoteStyle_Read)
+            val unreadStyleId = getResourceId(R.styleable.NoteView_noteUnreadStyle, R.style.NoteStyle_NotRead)
 
-            val readColor = context.getColor(R.color.note_read_all_bg)
-            val readText = context.getColor(R.color.note_read_text)
+            val unreadColors = getColorsFromTheme(unreadStyleId)
+            unreadHeaderColor = unreadColors.headerColor
+            unreadBgColor = unreadColors.bgColor
+            unreadTitleColor = unreadColors.titleColor
+            unreadTextColor = unreadColors.textColor
 
-            readHeaderColor = readColor
-            readBgColor = readColor
-            readTitleColor = readText
-            readTextColor = readText
+            val readColors = getColorsFromTheme(readStyleId)
+            readHeaderColor = readColors.headerColor
+            readBgColor = readColors.bgColor
+            readTitleColor = readColors.titleColor
+            readTextColor = readColors.textColor
         }
     }
+
+    private fun getColorsFromTheme(styleId: Int): NoteColors {
+        val attrs = context.obtainStyledAttributes(styleId, R.styleable.NoteView)
+        val colors = NoteColors(
+            headerColor = attrs.getColor(R.styleable.NoteView_noteHeaderColor, Color.TRANSPARENT),
+            bgColor = attrs.getColor(R.styleable.NoteView_noteBackgroundColor, Color.TRANSPARENT),
+            titleColor = attrs.getColor(R.styleable.NoteView_noteTitleColor, Color.BLACK),
+            textColor = attrs.getColor(R.styleable.NoteView_noteTextColor, Color.DKGRAY)
+        )
+        attrs.recycle()
+        return colors
+    }
+
+    private data class NoteColors(
+        @ColorInt val headerColor: Int,
+        @ColorInt val bgColor: Int,
+        @ColorInt val titleColor: Int,
+        @ColorInt val textColor: Int
+    )
 
     private fun setupOutline() {
         clipToOutline = true
