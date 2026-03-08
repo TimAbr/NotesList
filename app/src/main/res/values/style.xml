@@ -1,17 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <style name="NoteStyle">
-        <item name="noteCornerRadius">8dp</item>
+        <item name="noteCornerRadius">12dp</item>
         <item name="noteElevation">4dp</item>
+        <item name="isImportant">false</item>
     </style>
 
     <style name="NoteStyle.NotRead">
-        <item name="noteBackgroundColor">#FFFFFF</item>
-        <item name="noteTextColor">#000000</item>
+        <item name="isRead">false</item>
+        <item name="noteHeaderColor">@color/note_unread_header</item>
+        <item name="noteBackgroundColor">@color/note_unread_background</item>
+        <item name="noteTitleColor">@color/note_unread_title</item>
+        <item name="noteTextColor">@color/note_unread_text</item>
     </style>
 
     <style name="NoteStyle.Read">
-        <item name="noteBackgroundColor">#F0F0F0</item>
-        <item name="noteTextColor">#888888</item>
+        <item name="isRead">true</item>
+        <item name="noteHeaderColor">@color/note_read_all_bg</item>
+        <item name="noteBackgroundColor">@color/note_read_all_bg</item>
+        <item name="noteTitleColor">@color/note_read_text</item>
+        <item name="noteTextColor">@color/note_read_text</item>
     </style>
 </resources>

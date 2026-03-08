@@ -2,4 +2,15 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <color name="note_unread_header">#74B9FF</color>
+    <color name="note_unread_background">#FFFFFF</color>
+    <color name="note_unread_title">#1A1C1E</color>
+    <color name="note_unread_text">#44474E</color>
+
+    <color name="note_read_all_bg">#EBEDF0</color>
+    <color name="note_read_text">#8E9199</color>
+
+    <color name="note_star_color">#FFB900</color>
+    <color name="note_checkmark_color">#2E7D32</color>
 </resources>
