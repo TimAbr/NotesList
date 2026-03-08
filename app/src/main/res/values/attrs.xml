@@ -9,5 +9,9 @@
         <attr name="noteTextColor" format="color" />
         <attr name="noteCornerRadius" format="dimension" />
         <attr name="noteElevation" format="dimension" />
+        <attr name="noteTitleTextSize" format="dimension" />
+        <attr name="noteBodyTextSize" format="dimension" />
+        <attr name="noteDateTextSize" format="dimension" />
+        <attr name="notePadding" format="dimension" />
     </declare-styleable>
 </resources>
