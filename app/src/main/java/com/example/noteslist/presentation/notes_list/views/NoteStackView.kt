@@ -38,7 +38,7 @@ class NoteStackView @JvmOverloads constructor(
             PADDING_HORIZONTAL,
             PADDING_VERTICAL
         )
-        visibility = View.GONE
+        visibility = GONE
         setOnClickListener {
             isExpanded = false
         }
@@ -47,7 +47,7 @@ class NoteStackView @JvmOverloads constructor(
     private val emptyView: TextView = TextView(context).apply {
         text = context.getString(R.string.note_stack_empty_placeholder)
         gravity = android.view.Gravity.CENTER
-        visibility = View.GONE
+        visibility = GONE
     }
 
     init {
@@ -92,7 +92,7 @@ class NoteStackView @JvmOverloads constructor(
     }
 
     override fun onInterceptTouchEvent(ev: android.view.MotionEvent?): Boolean {
-        return !isExpanded || super.onInterceptTouchEvent(ev)
+        return (!isExpanded && ensureSortedNotes().size!=1) || super.onInterceptTouchEvent(ev)
     }
 
     override fun addView(child: View?, index: Int, params: LayoutParams?) {
@@ -166,16 +166,24 @@ class NoteStackView @JvmOverloads constructor(
         val noteViews = ensureSortedNotes()
         if (noteViews.isEmpty()) {
             emptyView.visibility = View.VISIBLE
-            measureChild(emptyView, widthMeasureSpec, heightMeasureSpec)
+            measureChild(
+                emptyView,
+                widthMeasureSpec,
+                heightMeasureSpec
+            )
             val h = emptyView.measuredHeight + paddingTop + paddingBottom
             val w = emptyView.measuredWidth + paddingLeft + paddingRight
-            setMeasuredDimension(resolveSize(w, widthMeasureSpec), resolveSize(h, heightMeasureSpec))
+            setMeasuredDimension(
+                resolveSize(w, widthMeasureSpec),
+                resolveSize(h, heightMeasureSpec)
+            )
             return
         }
 
         emptyView.visibility = View.GONE
         val parentWidth = MeasureSpec.getSize(widthMeasureSpec)
-        val availableWidth = (parentWidth - paddingLeft - paddingRight).coerceAtLeast(0)
+        val availableWidth = (parentWidth - paddingLeft - paddingRight)
+            .coerceAtLeast(0)
 
         if (isExpanded && noteViews.size > 1) {
             measureExpanded(noteViews, widthMeasureSpec, heightMeasureSpec, availableWidth)
@@ -200,8 +208,14 @@ class NoteStackView @JvmOverloads constructor(
             LayoutParams.WRAP_CONTENT
         )
 
-        notes.forEach { it.measure(childWidthSpec, childHeightSpec) }
-        measureChild(collapseButton, widthMeasureSpec, heightMeasureSpec)
+        notes.forEach {
+            it.measure(childWidthSpec, childHeightSpec)
+        }
+        measureChild(
+            collapseButton,
+            widthMeasureSpec,
+            heightMeasureSpec
+        )
 
         val maxChildWidth = if (notes.isEmpty()) 0 else notes.maxOf { it.measuredWidth }
         val desiredWidth = maxChildWidth + paddingLeft + paddingRight
@@ -234,8 +248,14 @@ class NoteStackView @JvmOverloads constructor(
             LayoutParams.WRAP_CONTENT
         )
 
-        notes.forEach { it.measure(childWidthSpec, childHeightSpec) }
-        measureChild(collapseButton, widthMeasureSpec, heightMeasureSpec)
+        notes.forEach {
+            it.measure(childWidthSpec, childHeightSpec)
+        }
+        measureChild(
+            collapseButton,
+            widthMeasureSpec,
+            heightMeasureSpec
+        )
 
         var maxWWithOffset = 0
         var maxHeight = 0
@@ -262,8 +282,12 @@ class NoteStackView @JvmOverloads constructor(
         if (noteViews.isEmpty()) {
             val left = paddingLeft
             val top = paddingTop
-            emptyView.layout(left, top, left + emptyView.measuredWidth, top + emptyView.measuredHeight)
-            return
+            emptyView.layout(
+                left,
+                top,
+                left + emptyView.measuredWidth,
+                top + emptyView.measuredHeight
+            )
         }
 
         if (isExpanded && noteViews.size > 1) {
