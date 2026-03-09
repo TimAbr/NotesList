@@ -10,6 +10,7 @@ import com.example.noteslist.presentation.notes_list.recycler_view.NoteListMappe
 import com.example.noteslist.presentation.notes_list.recycler_view.NotesAdapter
 import com.example.noteslist.presentation.notes_list.recycler_view.delegates.DateHeaderDelegate
 import com.example.noteslist.presentation.notes_list.recycler_view.delegates.NoteDelegate
+import com.example.noteslist.presentation.notes_list.recycler_view.NoteSpaceItemDecoration
 import com.example.noteslist.presentation.notes_list.recycler_view.delegates.NoteStackDelegate
 
 class MainActivity : AppCompatActivity() {
@@ -38,6 +39,10 @@ class MainActivity : AppCompatActivity() {
     private fun setupRecyclerView() {
         val recyclerView = findViewById<RecyclerView>(R.id.recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this)
+        
+        val spacing = resources.getDimensionPixelSize(R.dimen.note_list_spacing)
+        recyclerView.addItemDecoration(NoteSpaceItemDecoration(spacing))
+
         recyclerView.adapter = adapter
     }
 
