@@ -18,7 +18,7 @@ class DateHeaderDelegate : NoteListItemDelegate {
                 R.layout.item_date_header,
                 parent,
                 false
-            ) as TextView
+            )
     )
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, item: NoteListItem) {
@@ -26,11 +26,12 @@ class DateHeaderDelegate : NoteListItemDelegate {
     }
 
     class DateViewHolder(
-        private val textView: TextView
-    ) : RecyclerView.ViewHolder(textView) {
-        private val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
+        containerView: android.view.View
+    ) : RecyclerView.ViewHolder(containerView) {
+        private val textView: TextView = containerView.findViewById(R.id.dateHeaderText)
+        
         fun bind(item: NoteListItem.DateHeader) {
-            textView.text = String.format("[%s]", item.date.format(formatter))
+            textView.text = item.title
         }
     }
 }
