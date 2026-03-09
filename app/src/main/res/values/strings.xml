@@ -1,4 +1,5 @@
 <resources>
-    <string name="app_name">NotesList</string>
+    <string name="app_name">notes-list</string>
     <string name="note_stack_collapse_label">Свернуть</string>
+    <string name="note_stack_empty_placeholder">Нет заметок</string>
 </resources>

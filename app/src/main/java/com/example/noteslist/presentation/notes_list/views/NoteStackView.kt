@@ -44,6 +44,12 @@ class NoteStackView @JvmOverloads constructor(
         }
     }
 
+    private val emptyView: TextView = TextView(context).apply {
+        text = context.getString(R.string.note_stack_empty_placeholder)
+        gravity = android.view.Gravity.CENTER
+        visibility = View.GONE
+    }
+
     init {
         context.obtainStyledAttributes(attrs, R.styleable.NoteStackView).apply {
             stackSpacing = getDimensionPixelSize(
@@ -65,9 +71,11 @@ class NoteStackView @JvmOverloads constructor(
             recycle()
         }
         addView(collapseButton)
+        addView(emptyView)
 
         setOnClickListener {
-            if (!isExpanded) {
+            val visibleNotes = ensureSortedNotes().size
+            if (!isExpanded && visibleNotes > 1) {
                 isExpanded = true
             }
         }
@@ -88,7 +96,7 @@ class NoteStackView @JvmOverloads constructor(
     }
 
     override fun addView(child: View?, index: Int, params: LayoutParams?) {
-        if (child != collapseButton && child !is NoteView) {
+        if (child != collapseButton && child != emptyView && child !is NoteView) {
             throw IllegalArgumentException("NoteStackView can only contain NoteView children")
         }
         super.addView(child, index, params)
@@ -106,8 +114,10 @@ class NoteStackView @JvmOverloads constructor(
 
     fun setNoteViews(noteViews: List<NoteView>) {
         val button = collapseButton
+        val empty = emptyView
         removeAllViews()
         addView(button)
+        addView(empty)
 
         noteViews.forEach { addView(it) }
         
@@ -117,15 +127,22 @@ class NoteStackView @JvmOverloads constructor(
     }
 
     fun setNotes(notes: List<Note>) {
-        val currentNoteCount = (childCount - 1).coerceAtLeast(0)
+        if (childCount < 2 || getChildAt(0) != collapseButton || getChildAt(1) != emptyView) {
+            removeView(collapseButton)
+            removeView(emptyView)
+            addView(collapseButton, 0)
+            addView(emptyView, 1)
+        }
+
         val targetCount = notes.size
+        val currentNoteCount = (childCount - 2).coerceAtLeast(0)
 
         if (currentNoteCount > targetCount) {
-            removeViews(targetCount + 1, currentNoteCount - targetCount)
+            removeViews(targetCount + 2, currentNoteCount - targetCount)
         }
 
         notes.forEachIndexed { index, note ->
-            val childIndex = index + 1
+            val childIndex = index + 2
             val noteView = if (childIndex < childCount) {
                 getChildAt(childIndex) as NoteView
             } else {
@@ -148,14 +165,19 @@ class NoteStackView @JvmOverloads constructor(
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         val noteViews = ensureSortedNotes()
         if (noteViews.isEmpty()) {
-            setMeasuredDimension(resolveSize(0, widthMeasureSpec), resolveSize(0, heightMeasureSpec))
+            emptyView.visibility = View.VISIBLE
+            measureChild(emptyView, widthMeasureSpec, heightMeasureSpec)
+            val h = emptyView.measuredHeight + paddingTop + paddingBottom
+            val w = emptyView.measuredWidth + paddingLeft + paddingRight
+            setMeasuredDimension(resolveSize(w, widthMeasureSpec), resolveSize(h, heightMeasureSpec))
             return
         }
 
+        emptyView.visibility = View.GONE
         val parentWidth = MeasureSpec.getSize(widthMeasureSpec)
         val availableWidth = (parentWidth - paddingLeft - paddingRight).coerceAtLeast(0)
 
-        if (isExpanded) {
+        if (isExpanded && noteViews.size > 1) {
             measureExpanded(noteViews, widthMeasureSpec, heightMeasureSpec, availableWidth)
         } else {
             measureCollapsed(noteViews, widthMeasureSpec, heightMeasureSpec, availableWidth)
@@ -237,9 +259,14 @@ class NoteStackView @JvmOverloads constructor(
 
     override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
         val noteViews = ensureSortedNotes()
-        if (noteViews.isEmpty()) return
+        if (noteViews.isEmpty()) {
+            val left = paddingLeft
+            val top = paddingTop
+            emptyView.layout(left, top, left + emptyView.measuredWidth, top + emptyView.measuredHeight)
+            return
+        }
 
-        if (isExpanded) {
+        if (isExpanded && noteViews.size > 1) {
             layoutExpanded(noteViews)
         } else {
             layoutCollapsed(noteViews)
