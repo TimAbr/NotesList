@@ -248,16 +248,17 @@ class NoteStackView @JvmOverloads constructor(
 
     private fun layoutCollapsed(notes: List<NoteView>) {
         collapseButton.visibility = View.GONE
-        val visibleLimit = stackMaxVisible
+        val actualVisible = minOf(notes.size, stackMaxVisible)
 
         for (i in notes.indices) {
             val note = notes[i]
             val reverseIndex = notes.size - 1 - i
 
-            if (reverseIndex < visibleLimit) {
+            if (reverseIndex < actualVisible) {
                 note.visibility = View.VISIBLE
 
-                val offset = (visibleLimit - 1 - reverseIndex) * stackSpacing
+                val visualIndex = (actualVisible - 1) - reverseIndex
+                val offset = visualIndex * stackSpacing
 
                 val left = paddingLeft + offset
                 val top = paddingTop + offset
