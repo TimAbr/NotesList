@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.core.view.children
 import com.example.noteslist.R
+import com.example.noteslist.domain.models.Note
 
 class NoteStackView @JvmOverloads constructor(
     context: Context,
@@ -46,19 +47,19 @@ class NoteStackView @JvmOverloads constructor(
     init {
         context.obtainStyledAttributes(attrs, R.styleable.NoteStackView).apply {
             stackSpacing = getDimensionPixelSize(
-                R.styleable.NoteStackView_stackSpacing, 
+                R.styleable.NoteStackView_stackSpacing,
                 SPACING_DEFAULT
             )
             stackMaxVisible = getInt(
-                R.styleable.NoteStackView_stackMaxVisible, 
+                R.styleable.NoteStackView_stackMaxVisible,
                 MAX_VISIBLE_DEFAULT
             )
             isExpanded = getBoolean(
-                R.styleable.NoteStackView_isExpanded, 
+                R.styleable.NoteStackView_isExpanded,
                 false
             )
             stackExpandedSpacing = getDimensionPixelSize(
-                R.styleable.NoteStackView_stackExpandedSpacing, 
+                R.styleable.NoteStackView_stackExpandedSpacing,
                 EXPANDED_GAP_DEFAULT
             )
             recycle()
@@ -109,6 +110,39 @@ class NoteStackView @JvmOverloads constructor(
         addView(button)
 
         notes.forEach { addView(it) }
+        
+        areChildrenChanged = true
+        requestLayout()
+        invalidate()
+    }
+
+    fun setNotes(notes: List<Note>) {
+        val currentNoteCount = (childCount - 1).coerceAtLeast(0)
+        val targetCount = notes.size
+
+        if (currentNoteCount > targetCount) {
+            removeViews(targetCount + 1, currentNoteCount - targetCount)
+        }
+
+        notes.forEachIndexed { index, note ->
+            val childIndex = index + 1
+            val noteView = if (childIndex < childCount) {
+                getChildAt(childIndex) as NoteView
+            } else {
+                NoteView(context).apply {
+                    layoutParams = LayoutParams(
+                        LayoutParams.MATCH_PARENT,
+                        LayoutParams.WRAP_CONTENT
+                    )
+                    this@NoteStackView.addView(this)
+                }
+            }
+            noteView.data = note
+        }
+
+        areChildrenChanged = true
+        requestLayout()
+        invalidate()
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
@@ -135,15 +169,15 @@ class NoteStackView @JvmOverloads constructor(
         availableWidth: Int
     ) {
         val childWidthSpec = MeasureSpec.makeMeasureSpec(
-            availableWidth, 
+            availableWidth,
             MeasureSpec.AT_MOST
         )
         val childHeightSpec = getChildMeasureSpec(
-            heightMeasureSpec, 
-            paddingTop + paddingBottom, 
+            heightMeasureSpec,
+            paddingTop + paddingBottom,
             LayoutParams.WRAP_CONTENT
         )
-        
+
         notes.forEach { it.measure(childWidthSpec, childHeightSpec) }
         measureChild(collapseButton, widthMeasureSpec, heightMeasureSpec)
 
@@ -169,15 +203,15 @@ class NoteStackView @JvmOverloads constructor(
         val availableWidthInStack = (availableWidth - maxOffset).coerceAtLeast(0)
 
         val childWidthSpec = MeasureSpec.makeMeasureSpec(
-            availableWidthInStack, 
+            availableWidthInStack,
             MeasureSpec.AT_MOST
         )
         val childHeightSpec = getChildMeasureSpec(
-            heightMeasureSpec, 
-            paddingTop + paddingBottom, 
+            heightMeasureSpec,
+            paddingTop + paddingBottom,
             LayoutParams.WRAP_CONTENT
         )
-        
+
         notes.forEach { it.measure(childWidthSpec, childHeightSpec) }
         measureChild(collapseButton, widthMeasureSpec, heightMeasureSpec)
 
@@ -229,9 +263,9 @@ class NoteStackView @JvmOverloads constructor(
                 val top = paddingTop + offset
 
                 note.layout(
-                    left, 
-                    top, 
-                    left + note.measuredWidth, 
+                    left,
+                    top,
+                    left + note.measuredWidth,
                     top + note.measuredHeight
                 )
 
@@ -249,9 +283,9 @@ class NoteStackView @JvmOverloads constructor(
             note.visibility = View.VISIBLE
             note.translationZ = 0f
             note.layout(
-                paddingLeft, 
-                currentTop, 
-                paddingLeft + note.measuredWidth, 
+                paddingLeft,
+                currentTop,
+                paddingLeft + note.measuredWidth,
                 currentTop + note.measuredHeight
             )
             currentTop += note.measuredHeight + stackExpandedSpacing
@@ -259,9 +293,9 @@ class NoteStackView @JvmOverloads constructor(
 
         collapseButton.visibility = View.VISIBLE
         collapseButton.layout(
-            paddingLeft, 
-            currentTop, 
-            paddingLeft + collapseButton.measuredWidth, 
+            paddingLeft,
+            currentTop,
+            paddingLeft + collapseButton.measuredWidth,
             currentTop + collapseButton.measuredHeight
         )
     }
