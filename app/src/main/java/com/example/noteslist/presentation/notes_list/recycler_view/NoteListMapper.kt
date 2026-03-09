@@ -3,7 +3,9 @@ package com.example.noteslist.presentation.notes_list.recycler_view
 import com.example.noteslist.domain.models.Note
 import java.time.ZoneId
 
-class NoteListMapper {
+class NoteListMapper(
+    private val dateFormatter: NoteDateFormatter
+) {
     fun mapToAdapterItems(notes: List<Note>): List<NoteListItem> {
         val result = mutableListOf<NoteListItem>()
         
@@ -12,7 +14,7 @@ class NoteListMapper {
         }.toSortedMap(compareByDescending { it })
 
         groupedByDate.forEach { (date, notesInDate) ->
-            result.add(NoteListItem.DateHeader(date))
+            result.add(NoteListItem.DateHeader(dateFormatter.format(date)))
 
             val sortedNotes = notesInDate.sortedByDescending { it.timestamp }
 

@@ -20,8 +20,8 @@ class NoteSpaceItemDecoration(private val spacingPx: Int) : RecyclerView.ItemDec
 
         outRect.bottom = spacingPx
 
-        if (item is NoteListItem.DateHeader && position > 0) {
-            outRect.top = spacingPx * 2
+        if (item is NoteListItem.DateHeader) {
+            outRect.top = spacingPx/2
         }
     }
 }
