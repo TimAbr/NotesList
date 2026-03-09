@@ -13,7 +13,8 @@ class NotesAdapter(
     override fun getItemViewType(position: Int): Int {
         val item = getItem(position)
         val index = delegates.indexOfFirst { it.isForViewType(item) }
-        if (index == -1) throw IllegalArgumentException("No delegate found for item at position $position")
+        if (index == -1)
+            throw IllegalArgumentException("No delegate found for item at position $position")
         return index
     }
 

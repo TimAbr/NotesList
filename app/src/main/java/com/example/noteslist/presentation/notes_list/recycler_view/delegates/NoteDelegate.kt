@@ -22,7 +22,9 @@ class NoteDelegate : NoteListItemDelegate {
         (holder as NoteViewHolder).bind(item as NoteListItem.SingleNote)
     }
 
-    class NoteViewHolder(private val noteView: NoteView) : RecyclerView.ViewHolder(noteView) {
+    class NoteViewHolder(
+        private val noteView: NoteView
+    ) : RecyclerView.ViewHolder(noteView) {
         fun bind(item: NoteListItem.SingleNote) {
             noteView.data = item.note
         }
