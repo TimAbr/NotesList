@@ -331,8 +331,8 @@ class NoteStackView @JvmOverloads constructor(
     private fun layoutExpanded(notes: List<NoteView>) {
         var currentTop = paddingTop
 
-        notes.reversed().forEach { note ->
-            note.visibility = View.VISIBLE
+        notes.forEach { note ->
+            note.visibility = VISIBLE
             note.translationZ = 0f
             note.layout(
                 paddingLeft,
@@ -343,7 +343,7 @@ class NoteStackView @JvmOverloads constructor(
             currentTop += note.measuredHeight + stackExpandedSpacing
         }
 
-        collapseButton.visibility = View.VISIBLE
+        collapseButton.visibility = VISIBLE
         collapseButton.layout(
             paddingLeft,
             currentTop,
