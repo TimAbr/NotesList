@@ -25,16 +25,7 @@ class NoteStackDelegate : NoteListItemDelegate {
 
     class StackViewHolder(private val stackView: NoteStackView) : RecyclerView.ViewHolder(stackView) {
         fun bind(item: NoteListItem.NoteStack) {
-            val noteViews = item.notes.map { note ->
-                NoteView(stackView.context).apply {
-                    data = note
-                    layoutParams = ViewGroup.LayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT
-                    )
-                }
-            }
-            stackView.setNotes(noteViews)
+            stackView.setNotes(item.notes)
         }
     }
 }
