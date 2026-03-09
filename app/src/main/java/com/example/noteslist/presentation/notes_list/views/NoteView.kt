@@ -6,7 +6,6 @@ import android.graphics.Color
 import android.graphics.LinearGradient
 import android.graphics.Outline
 import android.graphics.Paint
-import android.graphics.Path
 import android.graphics.Shader
 import android.graphics.Typeface
 import android.text.StaticLayout
@@ -72,7 +71,6 @@ class NoteView @JvmOverloads constructor(
         typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
     }
     private val contentPaint = TextPaint(Paint.ANTI_ALIAS_FLAG)
-    private val commonPath = Path()
     private val importantIcon = AppCompatResources.getDrawable(context, R.drawable.baseline_star_24)
     private val readIcon = AppCompatResources.getDrawable(context, R.drawable.check_circle_24)
 
@@ -201,18 +199,6 @@ class NoteView @JvmOverloads constructor(
         val h = height.toFloat()
         val padding = notePadding
         val headerH = titleTextSize + padding * 2f
-
-        commonPath.reset()
-        commonPath.addRoundRect(
-            0f,
-            0f,
-            w,
-            h,
-            cornerRadius,
-            cornerRadius,
-            Path.Direction.CW
-        )
-        canvas.clipPath(commonPath)
 
         bgPaint.color = currentHeaderColor
         canvas.drawRect(0f, 0f, w, headerH, bgPaint)
