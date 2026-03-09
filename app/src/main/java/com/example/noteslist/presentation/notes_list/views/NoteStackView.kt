@@ -104,12 +104,12 @@ class NoteStackView @JvmOverloads constructor(
         return sortedNotes
     }
 
-    fun setNotes(notes: List<NoteView>) {
+    fun setNoteViews(noteViews: List<NoteView>) {
         val button = collapseButton
         removeAllViews()
         addView(button)
 
-        notes.forEach { addView(it) }
+        noteViews.forEach { addView(it) }
         
         areChildrenChanged = true
         requestLayout()
