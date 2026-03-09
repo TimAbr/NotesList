@@ -1,33 +1,49 @@
 package com.example.noteslist.presentation
 
 import android.os.Bundle
-import android.view.View
-import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.noteslist.R
-import com.example.noteslist.presentation.notes_list.views.note.NoteView
+import com.example.noteslist.data.repositories.NotesRepositoryImpl
+import com.example.noteslist.presentation.notes_list.recycler_view.NoteListMapper
+import com.example.noteslist.presentation.notes_list.recycler_view.NotesAdapter
+import com.example.noteslist.presentation.notes_list.recycler_view.delegates.DateHeaderDelegate
+import com.example.noteslist.presentation.notes_list.recycler_view.delegates.NoteDelegate
+import com.example.noteslist.presentation.notes_list.recycler_view.delegates.NoteStackDelegate
 
 class MainActivity : AppCompatActivity() {
+
+    private val repository = NotesRepositoryImpl()
+    private val mapper = NoteListMapper()
+    
+    private val adapter by lazy {
+        NotesAdapter(
+            listOf(
+                DateHeaderDelegate(),
+                NoteDelegate(),
+                NoteStackDelegate()
+            )
+        )
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val container = findViewById<ViewGroup>(R.id.notesContainer)
-        setupListeners(container)
+        setupRecyclerView()
+        loadData()
     }
 
-    private fun setupListeners(view: View) {
-        when (view) {
-            is NoteView -> {
-                view.setOnClickListener {
-                    view.data = view.data.copy(isRead = !view.data.isRead)
-                }
-            }
-            is ViewGroup -> {
-                for (i in 0 until view.childCount) {
-                    setupListeners(view.getChildAt(i))
-                }
-            }
-        }
+    private fun setupRecyclerView() {
+        val recyclerView = findViewById<RecyclerView>(R.id.recyclerView)
+        recyclerView.layoutManager = LinearLayoutManager(this)
+        recyclerView.adapter = adapter
+    }
+
+    private fun loadData() {
+        val notes = repository.getAllNotes()
+        val items = mapper.mapToAdapterItems(notes)
+        adapter.submitList(items)
     }
 }
