@@ -20,6 +20,7 @@ import androidx.core.content.withStyledAttributes
 import androidx.core.graphics.withTranslation
 import com.example.noteslist.R
 import com.example.noteslist.domain.models.Note
+import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
@@ -32,9 +33,7 @@ class NoteView @JvmOverloads constructor(
     var data: Note = Note(0, "", "")
         set(value) {
             field = value
-            formattedDate = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")
-                .withZone(ZoneId.systemDefault())
-                .format(value.timestamp)
+            formattedDate = dateFormatter.format(value.timestamp)
             requestLayout()
             invalidate()
         }
@@ -93,7 +92,26 @@ class NoteView @JvmOverloads constructor(
         context.withStyledAttributes(attrs, R.styleable.NoteView, defStyleAttr, R.style.NoteStyle) {
             val isRead = getBoolean(R.styleable.NoteView_isRead, false)
             val isImportant = getBoolean(R.styleable.NoteView_isImportant, false)
-            data = data.copy(isRead = isRead, isImportant = isImportant)
+            val parsedTitle = getString(R.styleable.NoteView_noteTitle) ?: data.title
+            val parsedBody = getString(R.styleable.NoteView_noteBody) ?: data.text
+            
+            data = data.copy(
+                isRead = isRead,
+                isImportant = isImportant,
+                title = parsedTitle,
+                text = parsedBody
+            )
+            
+            getString(R.styleable.NoteView_noteDate)?.let { dateStr ->
+                try {
+                    val parsedInstant = LocalDateTime.parse(dateStr, dateFormatter)
+                        .atZone(SYSTEM_ZONE)
+                        .toInstant()
+                    data = data.copy(timestamp = parsedInstant)
+                } catch (e: Exception) {
+                    throw IllegalArgumentException("Invalid date format: $dateStr. Expected: $DATE_FORMAT", e)
+                }
+            }
 
             cornerRadius = getDimension(R.styleable.NoteView_noteCornerRadius, 0f)
             noteElevation = getDimension(R.styleable.NoteView_noteElevation, 0f)
@@ -174,8 +192,9 @@ class NoteView @JvmOverloads constructor(
         val bodyHeight = staticLayout.height.coerceAtLeast(singleLineHeight)
 
         val dateHeight = dateTextSize + notePadding * 2f
+        val bodyGap = notePadding // Дополнительный отступ
 
-        val desiredHeight = (headerHeight + bodyHeight + dateHeight).toInt()
+        val desiredHeight = (headerHeight + bodyHeight + dateHeight + bodyGap * 2).toInt()
 
         val measuredWidth = desiredWidth
         val measuredHeight = when (heightMode) {
@@ -302,6 +321,13 @@ class NoteView @JvmOverloads constructor(
 
 
     companion object {
+        private const val DATE_FORMAT = "dd.MM.yyyy HH:mm"
+        private val SYSTEM_ZONE by lazy { ZoneId.systemDefault() }
+        private val dateFormatter by lazy {
+            DateTimeFormatter.ofPattern(DATE_FORMAT)
+                .withZone(SYSTEM_ZONE)
+        }
+
         private const val MAX_BODY_LINES = 2
 
         private const val TITLE_X_OFFSET_RATIO = 1.5f
