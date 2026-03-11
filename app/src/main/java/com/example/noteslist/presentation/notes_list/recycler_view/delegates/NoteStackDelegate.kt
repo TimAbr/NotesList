@@ -40,6 +40,7 @@ class NoteStackDelegate(
                     }
                 }
             }
+            stackView.isExpanded = item.isExpanded
         }
     }
 }

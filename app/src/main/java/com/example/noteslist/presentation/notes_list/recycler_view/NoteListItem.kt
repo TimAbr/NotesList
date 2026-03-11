@@ -6,5 +6,8 @@ import java.time.LocalDate
 sealed class NoteListItem {
     data class DateHeader(val title: String) : NoteListItem()
     data class SingleNote(val note: Note) : NoteListItem()
-    data class NoteStack(val notes: List<Note>) : NoteListItem()
+    data class NoteStack(
+        val notes: List<Note>,
+        val isExpanded: Boolean
+    ) : NoteListItem()
 }
