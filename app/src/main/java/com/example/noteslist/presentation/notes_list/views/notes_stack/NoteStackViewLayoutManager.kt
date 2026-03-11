@@ -2,6 +2,7 @@ package com.example.noteslist.presentation.notes_list.views.notes_stack
 
 import android.view.View
 import android.view.ViewGroup
+import com.example.noteslist.presentation.notes_list.views.ViewPaddings
 import com.example.noteslist.presentation.notes_list.views.note.NoteView
 
 class NoteStackViewLayoutManager {
@@ -12,12 +13,13 @@ class NoteStackViewLayoutManager {
         collapseButton: View,
         emptyView: View,
         isExpanded: Boolean,
-        paddingLeft: Int,
-        paddingTop: Int,
-        viewGroup: ViewGroup
+        paddings: ViewPaddings
     ) {
         if (notes.isEmpty()) {
-            layoutEmpty(viewGroup, paddingLeft, paddingTop, emptyView)
+            layoutEmpty(
+                paddings,
+                emptyView
+            )
             return
         }
 
@@ -25,30 +27,25 @@ class NoteStackViewLayoutManager {
             layoutExpanded(
                 notes,
                 collapseButton,
-                paddingLeft,
-                paddingTop,
+                paddings,
                 config
             )
         } else {
             layoutCollapsed(
                 notes,
                 config,
-                paddingLeft,
-                paddingTop,
-                viewGroup
+                paddings
             )
         }
     }
 
     private fun layoutEmpty(
-        viewGroup: ViewGroup,
-        paddingLeft: Int,
-        paddingTop: Int,
+        paddings: ViewPaddings,
         emptyView: View
     ) {
 
-        val left = paddingLeft
-        val top = paddingTop
+        val left = paddings.paddingLeft
+        val top = paddings.paddingTop
         emptyView.layout(
             left,
             top,
@@ -61,9 +58,7 @@ class NoteStackViewLayoutManager {
     private fun layoutCollapsed(
         notes: List<NoteView>,
         config: NoteStackViewConfig,
-        paddingLeft: Int,
-        paddingTop: Int,
-        viewGroup: ViewGroup
+        paddings: ViewPaddings
     ) {
         val actualVisible = minOf(notes.size, config.stackMaxVisible)
 
@@ -77,8 +72,8 @@ class NoteStackViewLayoutManager {
                 val visualIndex = (actualVisible - 1) - reverseIndex
                 val offset = visualIndex * config.stackSpacing
 
-                val left = paddingLeft + offset
-                val top = paddingTop + offset
+                val left = paddings.paddingLeft + offset
+                val top = paddings.paddingTop + offset
 
                 note.layout(
                     left,
@@ -97,19 +92,18 @@ class NoteStackViewLayoutManager {
     private fun layoutExpanded(
         notes: List<NoteView>,
         collapseButton: View,
-        paddingLeft: Int,
-        paddingTop: Int,
+        paddings: ViewPaddings,
         config: NoteStackViewConfig
     ) {
-        var currentTop = paddingTop
+        var currentTop = paddings.paddingTop
 
         notes.forEach { note ->
             note.visibility = View.VISIBLE
             note.translationZ = 0f
             note.layout(
-                paddingLeft,
+                paddings.paddingLeft,
                 currentTop,
-                paddingLeft + note.measuredWidth,
+                paddings.paddingLeft + note.measuredWidth,
                 currentTop + note.measuredHeight
             )
             currentTop += note.measuredHeight + config.stackExpandedSpacing
@@ -118,9 +112,9 @@ class NoteStackViewLayoutManager {
 
         collapseButton.visibility = View.VISIBLE
         collapseButton.layout(
-            paddingLeft,
+            paddings.paddingLeft,
             currentTop,
-            paddingLeft + collapseButton.measuredWidth,
+            paddings.paddingLeft + collapseButton.measuredWidth,
             currentTop + collapseButton.measuredHeight
         )
     }

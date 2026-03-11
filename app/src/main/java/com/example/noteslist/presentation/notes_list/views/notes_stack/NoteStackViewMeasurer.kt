@@ -4,6 +4,7 @@ import android.view.View
 import android.view.View.MeasureSpec
 import android.view.ViewGroup
 import android.view.ViewGroup.getChildMeasureSpec
+import com.example.noteslist.presentation.notes_list.views.ViewPaddings
 import com.example.noteslist.presentation.notes_list.views.note.NoteView
 
 class NoteStackViewMeasurer {
@@ -18,11 +19,12 @@ class NoteStackViewMeasurer {
         isExpanded: Boolean,
         widthMeasureSpec: Int,
         heightMeasureSpec: Int,
-        paddingLeft: Int,
-        paddingRight: Int,
-        paddingTop: Int,
-        paddingBottom: Int
+        paddings: ViewPaddings
     ): MeasuredSize {
+        val paddingLeft = paddings.paddingLeft
+        val paddingRight = paddings.paddingRight
+        val paddingTop = paddings.paddingTop
+        val paddingBottom = paddings.paddingBottom
 
         if (notes.isEmpty()) {
             measureChildSafe(
@@ -51,22 +53,15 @@ class NoteStackViewMeasurer {
                 widthMeasureSpec,
                 heightMeasureSpec,
                 availableWidth,
-                paddingLeft,
-                paddingRight,
-                paddingTop,
-                paddingBottom
+                paddings
             )
         } else {
             measureCollapsed(
                 notes,
                 config,
-                widthMeasureSpec,
                 heightMeasureSpec,
                 availableWidth,
-                paddingLeft,
-                paddingRight,
-                paddingTop,
-                paddingBottom
+                paddings
             )
         }
     }
@@ -78,10 +73,7 @@ class NoteStackViewMeasurer {
         widthMeasureSpec: Int,
         heightMeasureSpec: Int,
         availableWidth: Int,
-        paddingLeft: Int,
-        paddingRight: Int,
-        paddingTop: Int,
-        paddingBottom: Int
+        paddings: ViewPaddings
     ): MeasuredSize {
         val childWidthSpec = MeasureSpec.makeMeasureSpec(
             availableWidth,
@@ -89,7 +81,7 @@ class NoteStackViewMeasurer {
         )
         val childHeightSpec = ViewGroup.getChildMeasureSpec(
             heightMeasureSpec,
-            paddingTop + paddingBottom,
+            paddings.paddingTop + paddings.paddingBottom,
             ViewGroup.LayoutParams.WRAP_CONTENT
         )
 
@@ -113,8 +105,8 @@ class NoteStackViewMeasurer {
                 collapseButton,
                 widthMeasureSpec,
                 heightMeasureSpec,
-                paddingLeft + paddingRight,
-                paddingTop + paddingBottom
+                paddings.paddingLeft + paddings.paddingRight,
+                paddings.paddingTop + paddings.paddingBottom
             )
             buttonHeight = collapseButton.measuredHeight
             if (notes.isNotEmpty()) {
@@ -122,8 +114,9 @@ class NoteStackViewMeasurer {
             }
         }
 
-        val desiredWidth = maxChildWidth + paddingLeft + paddingRight
-        val desiredHeight = totalHeight + buttonHeight + paddingTop + paddingBottom
+        val desiredWidth = maxChildWidth + paddings.paddingLeft + paddings.paddingRight
+        val desiredHeight = totalHeight + buttonHeight +
+                paddings.paddingTop + paddings.paddingBottom
 
         return MeasuredSize(desiredWidth, desiredHeight)
     }
@@ -131,13 +124,9 @@ class NoteStackViewMeasurer {
     private fun measureCollapsed(
         notes: List<NoteView>,
         config: NoteStackViewConfig,
-        widthMeasureSpec: Int,
         heightMeasureSpec: Int,
         availableWidth: Int,
-        paddingLeft: Int,
-        paddingRight: Int,
-        paddingTop: Int,
-        paddingBottom: Int
+        paddings: ViewPaddings
     ): MeasuredSize {
         val visibleCount = minOf(notes.size, config.stackMaxVisible)
         val maxOffset = (visibleCount - 1) * config.stackSpacing
@@ -150,7 +139,7 @@ class NoteStackViewMeasurer {
         )
         val childHeightSpec = getChildMeasureSpec(
             heightMeasureSpec,
-            paddingTop + paddingBottom,
+            paddings.paddingTop + paddings.paddingBottom,
             ViewGroup.LayoutParams.WRAP_CONTENT
         )
 
@@ -172,8 +161,8 @@ class NoteStackViewMeasurer {
         }
 
         return MeasuredSize(
-            width = maxWidthWithOffset + paddingLeft + paddingRight,
-            height = maxHeightWithOffset + paddingTop + paddingBottom
+            width = maxWidthWithOffset + paddings.paddingLeft + paddings.paddingRight,
+            height = maxHeightWithOffset + paddings.paddingTop + paddings.paddingBottom
         )
     }
 

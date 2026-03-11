@@ -9,6 +9,7 @@ import android.widget.TextView
 import androidx.core.view.children
 import com.example.noteslist.R
 import com.example.noteslist.domain.models.Note
+import com.example.noteslist.presentation.notes_list.views.ViewPaddings
 import com.example.noteslist.presentation.notes_list.views.note.NoteView
 
 class NoteStackView @JvmOverloads constructor(
@@ -25,6 +26,12 @@ class NoteStackView @JvmOverloads constructor(
     private val layoutManager = NoteStackViewLayoutManager()
 
     private val config: NoteStackViewConfig
+    private val paddings = ViewPaddings(
+        paddingLeft = paddingLeft,
+        paddingTop = paddingTop,
+        paddingRight = paddingRight,
+        paddingBottom = paddingBottom
+    )
 
     var _isExpanded = false
     var isExpanded
@@ -172,10 +179,7 @@ class NoteStackView @JvmOverloads constructor(
             isExpanded = isExpanded,
             widthMeasureSpec = widthMeasureSpec,
             heightMeasureSpec = heightMeasureSpec,
-            paddingLeft = paddingLeft,
-            paddingRight = paddingRight,
-            paddingTop = paddingTop,
-            paddingBottom = paddingBottom
+            paddings = paddings
         )
 
         setMeasuredDimension(
@@ -192,9 +196,7 @@ class NoteStackView @JvmOverloads constructor(
             collapseButton,
             emptyView,
             isExpanded,
-            paddingLeft,
-            paddingTop,
-            this
+            paddings
         )
     }
 
