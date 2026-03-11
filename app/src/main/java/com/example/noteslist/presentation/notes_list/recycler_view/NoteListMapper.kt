@@ -2,14 +2,18 @@ package com.example.noteslist.presentation.notes_list.recycler_view
 
 import com.example.noteslist.domain.models.Note
 import com.example.noteslist.presentation.notes_list.NoteDateFormatter
+import java.time.LocalDate
 import java.time.ZoneId
 
 class NoteListMapper(
     private val dateFormatter: NoteDateFormatter
 ) {
-    fun mapToAdapterItems(notes: List<Note>): List<NoteListItem> {
+    fun mapToAdapterItems(
+        notes: List<Note>,
+        expandedStacks: Set<LocalDate>
+    ): List<NoteListItem> {
         val result = mutableListOf<NoteListItem>()
-        
+
         val groupedByDate = notes.groupBy { 
             it.timestamp.atZone(ZoneId.systemDefault()).toLocalDate() 
         }.toSortedMap(compareByDescending { it })
@@ -24,16 +28,20 @@ class NoteListMapper(
                 )
             )
 
-            val sortedNotes = notesInDate.sortedByDescending { it.timestamp }
-
-            val (importantNotes, regularNotes) = sortedNotes.partition { it.isImportant }
+            val (importantNotes, regularNotes) = notesInDate.partition { it.isImportant }
 
             importantNotes.forEach { 
                 result.add(NoteListItem.SingleNote(it)) 
             }
 
             if (regularNotes.isNotEmpty()) {
-                result.add(NoteListItem.NoteStack(regularNotes))
+                result.add(
+                    NoteListItem.NoteStack(
+                        regularNotes,
+                        expandedStacks.contains(date),
+                        date
+                    )
+                )
             }
         }
 

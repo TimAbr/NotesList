@@ -8,6 +8,7 @@ sealed class NoteListItem {
     data class SingleNote(val note: Note) : NoteListItem()
     data class NoteStack(
         val notes: List<Note>,
-        val isExpanded: Boolean
+        val isExpanded: Boolean,
+        val date: LocalDate
     ) : NoteListItem()
 }

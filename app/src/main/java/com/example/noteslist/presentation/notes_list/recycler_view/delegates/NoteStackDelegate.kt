@@ -7,9 +7,11 @@ import com.example.noteslist.domain.models.Note
 import com.example.noteslist.presentation.notes_list.recycler_view.NoteListItem
 import com.example.noteslist.presentation.notes_list.views.note.NoteView
 import com.example.noteslist.presentation.notes_list.views.notes_stack.NoteStackView
+import java.time.LocalDate
 
 class NoteStackDelegate(
-    private val onNoteClick: (Note)-> Unit
+    private val onNoteClick: (Note)-> Unit,
+    private val onStackClick: (LocalDate)->Unit
 ) : NoteListItemDelegate {
     override fun isForViewType(item: NoteListItem) = item is NoteListItem.NoteStack
 
@@ -20,7 +22,7 @@ class NoteStackDelegate(
                 ViewGroup.LayoutParams.WRAP_CONTENT
             )
         }
-        return StackViewHolder(stackView, onNoteClick)
+        return StackViewHolder(stackView, onNoteClick, onStackClick)
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, item: NoteListItem) {
@@ -29,7 +31,8 @@ class NoteStackDelegate(
 
     class StackViewHolder(
         private val stackView: NoteStackView,
-        private val onNoteClick: (Note)-> Unit
+        private val onNoteClick: (Note)-> Unit,
+        private val onStackClick: (LocalDate)->Unit
     ) : RecyclerView.ViewHolder(stackView) {
         fun bind(item: NoteListItem.NoteStack) {
             stackView.notes = item.notes
@@ -41,6 +44,12 @@ class NoteStackDelegate(
                 }
             }
             stackView.isExpanded = item.isExpanded
+            stackView.setOnClickListener {
+                onStackClick(item.date)
+            }
+            stackView.setCollapseButtonOnClickListener {
+                onStackClick(item.date)
+            }
         }
     }
 }
