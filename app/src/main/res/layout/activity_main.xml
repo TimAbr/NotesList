@@ -14,65 +14,115 @@
         android:padding="16dp"
         android:clipToPadding="false">
 
-        <com.example.noteslist.presentation.notes_list.views.note.NoteView
-            style="@style/NoteStyle"
-            android:layout_width="match_parent"
+        <TextView
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            app:noteTitle="Простая заметка"
-            app:noteBody="Это обычная непрочитанная заметка с дефолтными стилями."
-            app:noteDate="25.05.2024 10:00" />
+            android:text="1) Пустой стек (EmptyView)"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp"/>
 
-        <com.example.noteslist.presentation.notes_list.views.note.NoteView
-            style="@style/NoteStyle"
+        <com.example.noteslist.presentation.notes_list.views.notes_stack.NoteStackView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            app:isImportant="true"
-            app:noteBody="Тут должна появиться иконка звезды, а заголовок должен немного сместиться вправо."
-            app:noteDate="25.05.2024 12:30"
-            app:noteTitle="Очень важное дело" />
+            android:layout_marginBottom="32dp"
+            android:background="#E0E0E0"
+            android:padding="16dp"
+            app:stackSpacing="10dp" />
 
-        <com.example.noteslist.presentation.notes_list.views.note.NoteView
-            style="@style/NoteStyle.Read"
-            android:layout_width="match_parent"
+        <TextView
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            app:noteBody="Здесь фон заголовка и тела должен стать одинаковым, а внизу появиться галочка."
-            app:noteDate="20.05.2024 18:45"
-            app:noteTitle="Прочитанная заметка" />
+            android:text="2) Один элемент (без эффекта стека)"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp"/>
 
-        <com.example.noteslist.presentation.notes_list.views.note.NoteView
-            style="@style/NoteStyle"
+        <com.example.noteslist.presentation.notes_list.views.notes_stack.NoteStackView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            app:noteTitle="Тест градиента (Fade)"
-            app:noteBody="Этот текст специально сделан очень длинным, чтобы он не поместился в две строки. Мы проверяем, работает ли ограничение MAX_BODY_LINES и плавно ли обрезается текст с помощью нашего LinearGradient в конце второй строки. Проверка, проверка, проверка!"
-            app:noteDate="24.05.2024 09:15" />
+            android:layout_marginBottom="32dp"
+            app:stackSpacing="10dp">
 
-        <com.example.noteslist.presentation.notes_list.views.note.NoteView
-            style="@style/NoteStyle.Read"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            app:isImportant="true"
-            app:noteTitle="Важное, но прочитанное"
-            app:noteBody="Сочетание звезды в заголовке и галочки в футере на сером фоне."
-            app:noteDate="22.05.2024 15:00" />
+            <com.example.noteslist.presentation.notes_list.views.note.NoteView
+                style="@style/NoteStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:noteTitle="Одиночная заметка"
+                app:noteBody="Когда элемент один, стек не должен добавлять смещения."
+                app:noteDate="25.05.2024 10:00" />
+        </com.example.noteslist.presentation.notes_list.views.notes_stack.NoteStackView>
 
-        <com.example.noteslist.presentation.notes_list.views.note.NoteView
-            style="@style/NoteStyle"
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="3) Два элемента (стек шире)"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp"/>
+
+        <com.example.noteslist.presentation.notes_list.views.notes_stack.NoteStackView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            app:noteHeaderColor="#FFEB3B"
-            app:noteBackgroundColor="#FFF9C4"
-            app:noteTitleColor="#000000"
-            app:noteTitle="Кастомные цвета"
-            android:padding="5dp"
-            app:noteBody="Тут мы переопределили цвета и паддинги прямо в теге, не меняя стиль."
-            app:noteDate="25.05.2024 23:59" />
+            android:layout_marginBottom="32dp"
+            app:stackSpacing="20dp">
+
+            <com.example.noteslist.presentation.notes_list.views.note.NoteView
+                style="@style/NoteStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:noteTitle="Заметка сверху (2)"
+                app:noteBody="Этот элемент должен быть шире, чем в следующем примере."
+                app:noteDate="25.05.2024 11:00" />
+
+            <com.example.noteslist.presentation.notes_list.views.note.NoteView
+                style="@style/NoteStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:noteTitle="Заметка снизу"
+                app:noteDate="25.05.2024 10:30" />
+        </com.example.noteslist.presentation.notes_list.views.notes_stack.NoteStackView>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="4) Четыре элемента (стек уже, максимум 3 видимых)"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp"/>
+
+        <com.example.noteslist.presentation.notes_list.views.notes_stack.NoteStackView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="32dp"
+            app:stackSpacing="20dp"
+            app:stackMaxVisible="3">
+
+            <com.example.noteslist.presentation.notes_list.views.note.NoteView
+                style="@style/NoteStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:noteTitle="Верхняя заметка (4)"
+                app:noteBody="Здесь смещение больше, поэтому ширина контента меньше."
+                app:noteDate="25.05.2024 14:00" />
+
+            <com.example.noteslist.presentation.notes_list.views.note.NoteView
+                style="@style/NoteStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:noteTitle="Вторая заметка"
+                app:noteDate="25.05.2024 13:00" />
+
+            <com.example.noteslist.presentation.notes_list.views.note.NoteView
+                style="@style/NoteStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:noteTitle="Третья заметка"
+                app:noteDate="25.05.2024 12:00" />
+
+            <com.example.noteslist.presentation.notes_list.views.note.NoteView
+                style="@style/NoteStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:noteTitle="Четвертая (скрыта в стеке)"
+                app:noteDate="25.05.2024 11:00" />
+        </com.example.noteslist.presentation.notes_list.views.notes_stack.NoteStackView>
 
     </LinearLayout>
 </ScrollView>
