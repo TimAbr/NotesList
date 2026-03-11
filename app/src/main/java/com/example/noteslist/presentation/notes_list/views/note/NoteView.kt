@@ -3,10 +3,6 @@ package com.example.noteslist.presentation.notes_list.views.note
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Outline
-import android.graphics.Paint
-import android.text.StaticLayout
-import android.text.TextPaint
-import android.text.TextUtils
 import android.util.AttributeSet
 import android.view.View
 import android.view.ViewOutlineProvider
@@ -24,7 +20,6 @@ class NoteView @JvmOverloads constructor(
     private val renderer = NoteRenderer(context)
 
     private var formattedDate: String = ""
-    private var bodyLayout: StaticLayout? = null
 
     private val dateFormatter: NoteDateFormatter =
         NoteDateFormatterImpl()
@@ -35,7 +30,6 @@ class NoteView @JvmOverloads constructor(
     var data: Note
         get() = _data
         set(value) {
-            if (_data == value) return
             _data = value
             formattedDate = dateFormatter
                 .format(value.timestamp)
@@ -51,7 +45,6 @@ class NoteView @JvmOverloads constructor(
 
         elevation = config.noteElevation
         setupOutline()
-        setOnClickListener { data = data.copy(isRead = !data.isRead) }
     }
 
     private fun setupOutline() {
@@ -69,34 +62,41 @@ class NoteView @JvmOverloads constructor(
         }
     }
 
-    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+    override fun onMeasure(
+        widthMeasureSpec: Int,
+        heightMeasureSpec: Int
+    ) {
         val widthSize = MeasureSpec.getSize(widthMeasureSpec)
         val padding = config.notePadding
-        val textWidth = (widthSize - padding * 2).toInt().coerceAtLeast(0)
+        val textWidth = (widthSize - padding * 2)
+            .toInt()
+            .coerceAtLeast(0)
 
-        bodyLayout = createBodyLayout(data.text, textWidth)
+        val colors = if (data.isRead) {
+            config.readColors
+        } else {
+            config.unreadColors
+        }
+
+        val bodyHeight = renderer.createBodyLayout(
+            data.text,
+            textWidth,
+            config.bodyTextSize,
+            colors.textColor
+        )
 
         val headerHeight = config.titleTextSize + padding * 2f
-        val bodyHeight = (bodyLayout?.height ?: 0)
-            .coerceAtLeast(config.bodyTextSize.toInt())
         val dateHeight = config.dateTextSize + padding * 2f
 
-        val desiredHeight = (headerHeight + bodyHeight + dateHeight + padding * 2).toInt()
+        val desiredHeight = (
+            headerHeight + bodyHeight + dateHeight + padding * 2
+        ).toInt()
         setMeasuredDimension(
             widthSize,
             resolveSize(desiredHeight, heightMeasureSpec)
         )
     }
 
-    private fun createBodyLayout(text: String, width: Int): StaticLayout {
-        val paint = TextPaint(Paint.ANTI_ALIAS_FLAG)
-            .apply { textSize = config.bodyTextSize }
-        return StaticLayout.Builder
-            .obtain(text, 0, text.length, paint, width)
-            .setMaxLines(2)
-            .setEllipsize(TextUtils.TruncateAt.END)
-            .build()
-    }
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
@@ -105,7 +105,6 @@ class NoteView @JvmOverloads constructor(
             note = data,
             config = config,
             formattedDate = formattedDate,
-            bodyLayout = bodyLayout,
             width = width.toFloat(),
             height = height.toFloat()
         )

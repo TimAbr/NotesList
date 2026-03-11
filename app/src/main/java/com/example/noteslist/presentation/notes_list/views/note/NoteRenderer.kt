@@ -9,6 +9,7 @@ import android.graphics.Shader
 import android.graphics.Typeface
 import android.text.StaticLayout
 import android.text.TextPaint
+import android.text.TextUtils
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.graphics.withTranslation
 import com.example.noteslist.R
@@ -22,6 +23,8 @@ class NoteRenderer(private val context: Context) {
     }
     private val contentPaint = TextPaint(Paint.ANTI_ALIAS_FLAG)
 
+    private var bodyLayout: StaticLayout? = null
+
     private val importantIcon = AppCompatResources
         .getDrawable(context, R.drawable.baseline_star_24)
     private val readIcon = AppCompatResources
@@ -31,12 +34,29 @@ class NoteRenderer(private val context: Context) {
     private var fadeGradientWidth: Float = -1f
     private var fadeGradientColor: Int = -1
 
+    fun createBodyLayout(
+        text: String,
+        width: Int,
+        textSize: Float,
+        textColor: Int
+    ): Int {
+        val paint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
+            this.textSize = textSize
+            color = textColor
+        }
+        bodyLayout = StaticLayout.Builder
+            .obtain(text, 0, text.length, paint, width)
+            .setMaxLines(MAX_BODY_LINES)
+            .setEllipsize(TextUtils.TruncateAt.END)
+            .build()
+        return bodyLayout?.height ?: 0
+    }
+
     fun draw(
         canvas: Canvas,
         note: Note,
         formattedDate: String,
         config: NoteViewConfig,
-        bodyLayout: StaticLayout?,
         width: Float,
         height: Float
     ) {
@@ -48,9 +68,9 @@ class NoteRenderer(private val context: Context) {
 
         drawHeader(canvas, note, config, colors, padding, headerH)
 
-        drawBody(canvas, bodyLayout, colors, config, padding, headerH, width)
+        drawBody(canvas, colors, config, padding, headerH, width)
 
-        drawFooter(canvas, note,  config, formattedDate, colors, width, height, padding)
+        drawFooter(canvas, note, config, formattedDate, colors, width, height, padding)
     }
 
     private fun drawBackground(
@@ -102,18 +122,14 @@ class NoteRenderer(private val context: Context) {
 
     private fun drawBody(
         canvas: Canvas,
-        layout: StaticLayout?,
         colors: NoteColors,
         config: NoteViewConfig,
         padding: Float,
         headerH: Float,
         w: Float
     ) {
-        contentPaint.color = colors.textColor
-        contentPaint.textSize = config.bodyTextSize
-
         canvas.withTranslation(padding, headerH + padding) {
-            layout?.let {
+            bodyLayout?.let {
                 it.draw(this)
                 if (it.lineCount >= MAX_BODY_LINES) {
                     val lastLine = it.lineCount - 1
@@ -139,6 +155,7 @@ class NoteRenderer(private val context: Context) {
         h: Float,
         padding: Float
     ) {
+        contentPaint.color = colors.textColor
         contentPaint.textSize = config.dateTextSize
         canvas.drawText(formattedDate, padding, h - padding, contentPaint)
 
