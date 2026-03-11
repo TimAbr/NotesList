@@ -101,4 +101,17 @@ class NotesRepositoryImpl : NotesRepository {
     override fun getAllNotes(): List<Note> {
         return notes.toList()
     }
+
+    override fun updateNote(note: Note) {
+        val ind = notes.indexOfFirst { note.id == it.id }
+        notes[ind] = note
+    }
+
+    override fun addNote(note: Note) {
+        notes.add(note)
+    }
+
+    override fun deleteNote(id: Int) {
+        notes.removeIf { it.id == id.toLong() }
+    }
 }
