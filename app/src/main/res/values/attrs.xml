@@ -24,5 +24,6 @@
         <attr name="stackMaxVisible" format="integer" />
         <attr name="isExpanded" format="boolean" />
         <attr name="stackExpandedSpacing" format="dimension" />
+        <attr name="collapseButtonColor" format="color" />
     </declare-styleable>
 </resources>

@@ -7,6 +7,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.annotation.ColorInt
 import androidx.core.view.children
 import com.example.noteslist.R
 import com.example.noteslist.domain.models.Note
@@ -20,7 +21,7 @@ class NoteStackView @JvmOverloads constructor(
 ) : ViewGroup(context, attrs, defStyleAttr) {
 
     private val emptyView: View = createEmptyView()
-    private val collapseButton: TextView = createCollapseButton()
+    private val collapseButton: View
 
     private val attributeParser = NoteStackViewAttributeParser()
     private val measurer = NoteStackViewMeasurer()
@@ -34,7 +35,7 @@ class NoteStackView @JvmOverloads constructor(
         paddingBottom = paddingBottom
     )
 
-    var _isExpanded = false
+    private var _isExpanded = false
     var isExpanded
         get() = _isExpanded
         set(value) {
@@ -88,12 +89,15 @@ class NoteStackView @JvmOverloads constructor(
     private var areChildrenChanged = true
 
     init {
-        addView(emptyView)
-        addView(collapseButton)
 
         val (configAttr, isExpandedAttr) = attributeParser.parse(context, attrs)
         _isExpanded = isExpandedAttr
         this.config = configAttr
+
+        collapseButton = createCollapseButton(config.collapseButtonColor)
+
+        addView(emptyView)
+        addView(collapseButton)
 
         ensureSortedNotes()
         updateInternalViews()
@@ -112,9 +116,10 @@ class NoteStackView @JvmOverloads constructor(
             visibility = GONE
         }
 
-    private fun createCollapseButton() = TextView(context).apply {
+    private fun createCollapseButton(@ColorInt buttonColor: Int) = TextView(context).apply {
         val label = context.getString(R.string.note_stack_collapse_label)
         text = String.format(COLLAPSE_TEMPLATE, label)
+        setTextColor(buttonColor)
         setPadding(
             PADDING_HORIZONTAL,
             PADDING_VERTICAL,
