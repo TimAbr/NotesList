@@ -105,7 +105,7 @@ class NoteViewAttributeParser(private val noteDateFormatter: NoteDateFormatter) 
                 } catch (e: Exception) {
                     null
                 }
-            } ?: Instant.now()
+            } ?: DEFAULT_TIME
         )
     }
 
@@ -155,16 +155,13 @@ class NoteViewAttributeParser(private val noteDateFormatter: NoteDateFormatter) 
                 R.styleable.NoteView_noteDateTextSize,
                 DEFAULT_DIMEN
             ),
-            notePadding = getDimension(
-                R.styleable.NoteView_notePadding,
-                DEFAULT_DIMEN
-            ),
             unreadColors = unreadColors,
             readColors = readColors
         )
     }
 
     companion object {
+        private val DEFAULT_TIME = Instant.now()
         private const val DEFAULT_ID = 0L
         private const val DEFAULT_STRING = ""
         private const val DEFAULT_BOOLEAN = false

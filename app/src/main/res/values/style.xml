@@ -7,7 +7,7 @@
         <item name="noteTitleTextSize">16sp</item>
         <item name="noteBodyTextSize">14sp</item>
         <item name="noteDateTextSize">12sp</item>
-        <item name="notePadding">16dp</item>
+        <item name="android:padding">16dp</item>
         <item name="noteReadStyle">@style/NoteStyle.Read</item>
         <item name="noteUnreadStyle">@style/NoteStyle.NotRead</item>
     </style>

@@ -9,6 +9,7 @@ import android.view.ViewOutlineProvider
 import com.example.noteslist.domain.models.Note
 import com.example.noteslist.presentation.notes_list.NoteDateFormatter
 import com.example.noteslist.presentation.notes_list.NoteDateFormatterImpl
+import com.example.noteslist.presentation.notes_list.views.ViewPaddings
 
 class NoteView @JvmOverloads constructor(
     context: Context,
@@ -17,7 +18,16 @@ class NoteView @JvmOverloads constructor(
 ) : View(context, attrs, defStyleAttr) {
 
     private var config: NoteViewConfig
-    private val renderer = NoteRenderer(context)
+    private val paddings = ViewPaddings(
+        paddingLeft = paddingLeft,
+        paddingTop = paddingTop,
+        paddingRight = paddingRight,
+        paddingBottom = paddingBottom
+    )
+
+    private val renderer = NoteViewRenderer(context)
+    private val measurer = NoteViewMeasurer(renderer)
+
 
     private var formattedDate: String = ""
 
@@ -62,38 +72,17 @@ class NoteView @JvmOverloads constructor(
         }
     }
 
-    override fun onMeasure(
-        widthMeasureSpec: Int,
-        heightMeasureSpec: Int
-    ) {
-        val widthSize = MeasureSpec.getSize(widthMeasureSpec)
-        val padding = config.notePadding
-        val textWidth = (widthSize - padding * 2)
-            .toInt()
-            .coerceAtLeast(0)
-
-        val colors = if (data.isRead) {
-            config.readColors
-        } else {
-            config.unreadColors
-        }
-
-        val bodyHeight = renderer.createBodyLayout(
-            data.text,
-            textWidth,
-            config.bodyTextSize,
-            colors.textColor
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        val result = measurer.measure(
+            note = data,
+            config = config,
+            paddings = paddings,
+            widthMeasureSpec = widthMeasureSpec
         )
 
-        val headerHeight = config.titleTextSize + padding * 2f
-        val dateHeight = config.dateTextSize + padding * 2f
-
-        val desiredHeight = (
-            headerHeight + bodyHeight + dateHeight + padding * 2
-        ).toInt()
         setMeasuredDimension(
-            widthSize,
-            resolveSize(desiredHeight, heightMeasureSpec)
+            result.measuredWidth,
+            resolveSize(result.measuredHeight, heightMeasureSpec)
         )
     }
 
@@ -106,7 +95,8 @@ class NoteView @JvmOverloads constructor(
             config = config,
             formattedDate = formattedDate,
             width = width.toFloat(),
-            height = height.toFloat()
+            height = height.toFloat(),
+            paddings = paddings
         )
     }
 }

@@ -6,7 +6,6 @@ data class NoteViewConfig(
     val titleTextSize: Float,
     val bodyTextSize: Float,
     val dateTextSize: Float,
-    val notePadding: Float,
     val unreadColors: NoteColors,
     val readColors: NoteColors
 )

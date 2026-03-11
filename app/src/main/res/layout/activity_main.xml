@@ -69,8 +69,8 @@
             app:noteHeaderColor="#FFEB3B"
             app:noteBackgroundColor="#FFF9C4"
             app:noteTitleColor="#000000"
-            app:notePadding="24dp"
             app:noteTitle="Кастомные цвета"
+            android:padding="5dp"
             app:noteBody="Тут мы переопределили цвета и паддинги прямо в теге, не меняя стиль."
             app:noteDate="25.05.2024 23:59" />
 

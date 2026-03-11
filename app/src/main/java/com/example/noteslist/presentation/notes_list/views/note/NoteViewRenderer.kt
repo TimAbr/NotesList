@@ -14,8 +14,9 @@ import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.graphics.withTranslation
 import com.example.noteslist.R
 import com.example.noteslist.domain.models.Note
+import com.example.noteslist.presentation.notes_list.views.ViewPaddings
 
-class NoteRenderer(private val context: Context) {
+class NoteViewRenderer(private val context: Context) {
 
     private val bgPaint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val titlePaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -57,30 +58,21 @@ class NoteRenderer(private val context: Context) {
         note: Note,
         formattedDate: String,
         config: NoteViewConfig,
+        paddings: ViewPaddings,
         width: Float,
         height: Float
     ) {
         val colors = if (note.isRead) config.readColors else config.unreadColors
-        val padding = config.notePadding
-        val headerH = config.titleTextSize + padding * 2f
+
+        val headerH = paddings.paddingTop + config.titleTextSize + paddings.paddingTop
 
         drawBackground(canvas, width, height, headerH, colors)
-
-        drawHeader(canvas, note, config, colors, padding, headerH)
-
-        drawBody(canvas, colors, config, padding, headerH, width)
-
-        drawFooter(canvas, note, config, formattedDate, colors, width, height, padding)
+        drawHeader(canvas, note, config, colors, paddings)
+        drawBody(canvas, colors, config, paddings, headerH, width)
+        drawFooter(canvas, note, config, formattedDate, colors, width, height, paddings)
     }
 
-    private fun drawBackground(
-        canvas: Canvas,
-        w: Float,
-        h: Float,
-        headerH:
-        Float,
-        colors: NoteColors
-    ) {
+    private fun drawBackground(canvas: Canvas, w: Float, h: Float, headerH: Float, colors: NoteColors) {
         bgPaint.shader = null
         bgPaint.color = colors.headerColor
         canvas.drawRect(0f, 0f, w, headerH, bgPaint)
@@ -89,53 +81,46 @@ class NoteRenderer(private val context: Context) {
         canvas.drawRect(0f, headerH, w, h, bgPaint)
     }
 
-    private fun drawHeader(
-        canvas: Canvas,
-        note: Note,
-        config: NoteViewConfig,
-        colors: NoteColors,
-        padding: Float,
-        headerH: Float
-    ) {
+    private fun drawHeader(canvas: Canvas, note: Note, config: NoteViewConfig, colors: NoteColors, paddings: ViewPaddings) {
         titlePaint.color = colors.titleColor
         titlePaint.textSize = config.titleTextSize
 
-        var titleX = padding
+        var titleX = paddings.paddingLeft.toFloat()
+        val iconSize = (config.titleTextSize * ICON_SIZE_RATIO).toInt()
+
         if (note.isImportant) {
-            val size = (titlePaint.textSize * ICON_SIZE_RATIO).toInt()
             importantIcon?.let {
+                val iconTop = paddings.paddingTop + (config.titleTextSize - iconSize) / 2f
                 it.setBounds(
-                    padding.toInt(),
-                    (headerH / 2 - size / 2).toInt(),
-                    (padding + size).toInt(),
-                    (headerH / 2 + size / 2).toInt()
+                    paddings.paddingLeft,
+                    iconTop.toInt(),
+                    paddings.paddingLeft + iconSize,
+                    (iconTop + iconSize).toInt()
                 )
                 it.setTint(context.getColor(R.color.note_star_color))
                 it.draw(canvas)
             }
-            titleX += titlePaint.textSize * TITLE_X_OFFSET_RATIO
+            titleX += config.titleTextSize * TITLE_X_OFFSET_RATIO
         }
 
-        val titleY = (headerH / 2) - ((titlePaint.descent() + titlePaint.ascent()) / 2)
+        val titleY = paddings.paddingTop + config.titleTextSize - (titlePaint.descent() / 2f)
         canvas.drawText(note.title, titleX, titleY, titlePaint)
     }
 
-    private fun drawBody(
-        canvas: Canvas,
-        colors: NoteColors,
-        config: NoteViewConfig,
-        padding: Float,
-        headerH: Float,
-        w: Float
-    ) {
-        canvas.withTranslation(padding, headerH + padding) {
+    private fun drawBody(canvas: Canvas, colors: NoteColors, config: NoteViewConfig, paddings: ViewPaddings, headerH: Float, w: Float) {
+        contentPaint.color = colors.textColor
+        contentPaint.textSize = config.bodyTextSize
+
+        val bodyY = headerH + paddings.paddingTop
+
+        canvas.withTranslation(paddings.paddingLeft.toFloat(), bodyY) {
             bodyLayout?.let {
                 it.draw(this)
                 if (it.lineCount >= MAX_BODY_LINES) {
                     val lastLine = it.lineCount - 1
                     drawFadeEffect(
                         this,
-                        (w - padding * 2).coerceAtLeast(0f),
+                        (w - paddings.paddingLeft - paddings.paddingRight).coerceAtLeast(0f),
                         it.getLineTop(lastLine).toFloat(),
                         it.getLineBottom(lastLine).toFloat(),
                         colors.bgColor
@@ -145,41 +130,31 @@ class NoteRenderer(private val context: Context) {
         }
     }
 
-    private fun drawFooter(
-        canvas: Canvas,
-        note: Note,
-        config: NoteViewConfig,
-        formattedDate: String,
-        colors: NoteColors,
-        w: Float,
-        h: Float,
-        padding: Float
-    ) {
-        contentPaint.color = colors.textColor
+    private fun drawFooter(canvas: Canvas, note: Note, config: NoteViewConfig, formattedDate: String, colors: NoteColors, w: Float, h: Float, paddings: ViewPaddings) {
         contentPaint.textSize = config.dateTextSize
-        canvas.drawText(formattedDate, padding, h - padding, contentPaint)
+
+        val dateY = h - paddings.paddingBottom
+
+        canvas.drawText(formattedDate, paddings.paddingLeft.toFloat(), dateY, contentPaint)
 
         if (note.isRead) {
-            val size = (config.titleTextSize * ICON_SIZE_RATIO).toInt()
-            val x = w - padding * READ_ICON_X_PADDING_RATIO
-            val y = h - padding * READ_ICON_Y_PADDING_RATIO
+            val iconSize = (config.titleTextSize * ICON_SIZE_RATIO).toInt()
             readIcon?.let {
-                val left = (x - size / 2).toInt()
-                val top = (y - size / 2).toInt()
-                it.setBounds(left, top, left + size, top + size)
+                val x = w - paddings.paddingRight
+                val iconCenterY = dateY - (config.dateTextSize / 2f)
+                it.setBounds(
+                    (x - iconSize).toInt(),
+                    (iconCenterY - iconSize / 2f).toInt(),
+                    x.toInt(),
+                    (iconCenterY + iconSize / 2f).toInt()
+                )
                 it.setTint(context.getColor(R.color.note_checkmark_color))
                 it.draw(canvas)
             }
         }
     }
 
-    private fun drawFadeEffect(
-        canvas: Canvas,
-        width: Float,
-        top: Float,
-        bottom: Float,
-        bgColor: Int
-    ) {
+    private fun drawFadeEffect(canvas: Canvas, width: Float, top: Float, bottom: Float, bgColor: Int) {
         val fadeWidth = width * FADE_WIDTH_RATIO
         if (fadeGradient == null || width != fadeGradientWidth || bgColor != fadeGradientColor) {
             fadeGradientWidth = width
@@ -200,7 +175,5 @@ class NoteRenderer(private val context: Context) {
         private const val TITLE_X_OFFSET_RATIO = 1.5f
         private const val FADE_WIDTH_RATIO = 0.3f
         private const val ICON_SIZE_RATIO = 1.2f
-        private const val READ_ICON_X_PADDING_RATIO = 1.5f
-        private const val READ_ICON_Y_PADDING_RATIO = 1.2f
     }
 }
