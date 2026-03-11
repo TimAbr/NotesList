@@ -2,6 +2,7 @@ package com.example.noteslist.presentation.notes_list.views.notes_stack
 
 import android.content.Context
 import android.util.AttributeSet
+import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
@@ -18,7 +19,7 @@ class NoteStackView @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : ViewGroup(context, attrs, defStyleAttr) {
 
-    private val emptyView: TextView = createEmptyView()
+    private val emptyView: View = createEmptyView()
     private val collapseButton: TextView = createCollapseButton()
 
     private val attributeParser = NoteStackViewAttributeParser()
@@ -104,11 +105,12 @@ class NoteStackView @JvmOverloads constructor(
         }
     }
 
-    private fun createEmptyView() = TextView(context).apply {
-        text = context.getString(R.string.note_stack_empty_placeholder)
-        gravity = android.view.Gravity.CENTER
-        visibility = GONE
-    }
+    private fun createEmptyView() = LayoutInflater
+        .from(context)
+        .inflate(R.layout.view_note_stack_empty, this, false)
+        .apply {
+            visibility = GONE
+        }
 
     private fun createCollapseButton() = TextView(context).apply {
         val label = context.getString(R.string.note_stack_collapse_label)
