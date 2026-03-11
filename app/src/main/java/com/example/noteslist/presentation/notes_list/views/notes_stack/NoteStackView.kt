@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.annotation.ColorInt
+import androidx.appcompat.view.ContextThemeWrapper
 import androidx.core.view.children
 import com.example.noteslist.R
 import com.example.noteslist.domain.models.Note
@@ -63,12 +64,12 @@ class NoteStackView @JvmOverloads constructor(
                     removeViewAt(i)
                 }
             }
-
+            val styledContext = ContextThemeWrapper(context, R.style.NoteStyle)
             notes.forEachIndexed { index, note ->
                 val noteView = if (index < noteViews.size) {
                     noteViews[index]
                 } else {
-                    NoteView(context).apply {
+                    NoteView(styledContext).apply {
                         layoutParams = LayoutParams(
                             LayoutParams.MATCH_PARENT,
                             LayoutParams.WRAP_CONTENT
