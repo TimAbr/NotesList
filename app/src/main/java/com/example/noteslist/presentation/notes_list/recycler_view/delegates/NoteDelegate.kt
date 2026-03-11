@@ -3,7 +3,7 @@ package com.example.noteslist.presentation.notes_list.recycler_view.delegates
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.noteslist.presentation.notes_list.recycler_view.NoteListItem
-import com.example.noteslist.presentation.notes_list.views.NoteView
+import com.example.noteslist.presentation.notes_list.views.note.NoteView
 
 class NoteDelegate : NoteListItemDelegate {
     override fun isForViewType(item: NoteListItem) = item is NoteListItem.SingleNote

@@ -31,7 +31,7 @@ class NotesAdapter(
         override fun areItemsTheSame(oldItem: NoteListItem, newItem: NoteListItem): Boolean {
             return when {
                 oldItem is NoteListItem.DateHeader && newItem is NoteListItem.DateHeader -> 
-                    oldItem.date == newItem.date
+                    oldItem.title == newItem.title
                 oldItem is NoteListItem.SingleNote && newItem is NoteListItem.SingleNote -> 
                     oldItem.note.id == newItem.note.id
                 oldItem is NoteListItem.NoteStack && newItem is NoteListItem.NoteStack -> 
