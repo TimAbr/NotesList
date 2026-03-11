@@ -1,6 +1,7 @@
 package com.example.noteslist.presentation.notes_list.recycler_view
 
 import com.example.noteslist.domain.models.Note
+import com.example.noteslist.presentation.notes_list.NoteDateFormatter
 import java.time.ZoneId
 
 class NoteListMapper(
@@ -14,7 +15,14 @@ class NoteListMapper(
         }.toSortedMap(compareByDescending { it })
 
         groupedByDate.forEach { (date, notesInDate) ->
-            result.add(NoteListItem.DateHeader(dateFormatter.format(date)))
+            result.add(
+                NoteListItem.DateHeader(
+                    dateFormatter.format(
+                        date.atStartOfDay(SYSTEM_ZONE
+                        ).toInstant()
+                    )
+                )
+            )
 
             val sortedNotes = notesInDate.sortedByDescending { it.timestamp }
 
@@ -30,5 +38,9 @@ class NoteListMapper(
         }
 
         return result
+    }
+
+    companion object{
+        private val SYSTEM_ZONE = ZoneId.systemDefault()
     }
 }
