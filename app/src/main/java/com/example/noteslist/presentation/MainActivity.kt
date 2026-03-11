@@ -6,6 +6,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.noteslist.R
 import com.example.noteslist.data.repositories.NotesRepositoryImpl
+import com.example.noteslist.domain.models.Note
 import com.example.noteslist.presentation.notes_list.recycler_view.NoteListMapper
 import com.example.noteslist.presentation.notes_list.recycler_view.NotesAdapter
 import com.example.noteslist.presentation.notes_list.recycler_view.delegates.DateHeaderDelegate
@@ -18,16 +19,20 @@ class MainActivity : AppCompatActivity() {
 
     private val repository = NotesRepositoryImpl()
     private val mapper = NoteListMapper(RelativeDateFormatter(this))
-    
-    private val adapter by lazy {
-        NotesAdapter(
+
+    private fun onNoteClick(clickedNote: Note){
+        val updatedNote = clickedNote.copy(isRead = !clickedNote.isRead)
+        repository.updateNote(updatedNote)
+        loadData()
+    }
+    private val adapter = NotesAdapter(
             listOf(
                 DateHeaderDelegate(),
-                NoteDelegate(),
-                NoteStackDelegate()
+                NoteDelegate(::onNoteClick),
+                NoteStackDelegate(::onNoteClick)
             )
         )
-    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
