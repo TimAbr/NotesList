@@ -1,11 +1,16 @@
 package com.example.noteslist.presentation.notes_list.recycler_view.delegates
 
 import android.view.ViewGroup
+import androidx.core.view.children
 import androidx.recyclerview.widget.RecyclerView
+import com.example.noteslist.domain.models.Note
 import com.example.noteslist.presentation.notes_list.recycler_view.NoteListItem
+import com.example.noteslist.presentation.notes_list.views.note.NoteView
 import com.example.noteslist.presentation.notes_list.views.notes_stack.NoteStackView
 
-class NoteStackDelegate : NoteListItemDelegate {
+class NoteStackDelegate(
+    private val onNoteClick: (Note)-> Unit
+) : NoteListItemDelegate {
     override fun isForViewType(item: NoteListItem) = item is NoteListItem.NoteStack
 
     override fun onCreateViewHolder(parent: ViewGroup): RecyclerView.ViewHolder {
@@ -15,7 +20,7 @@ class NoteStackDelegate : NoteListItemDelegate {
                 ViewGroup.LayoutParams.WRAP_CONTENT
             )
         }
-        return StackViewHolder(stackView)
+        return StackViewHolder(stackView, onNoteClick)
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, item: NoteListItem) {
@@ -23,10 +28,18 @@ class NoteStackDelegate : NoteListItemDelegate {
     }
 
     class StackViewHolder(
-        private val stackView: NoteStackView
+        private val stackView: NoteStackView,
+        private val onNoteClick: (Note)-> Unit
     ) : RecyclerView.ViewHolder(stackView) {
         fun bind(item: NoteListItem.NoteStack) {
             stackView.notes = item.notes
+            stackView.children.forEach { child ->
+                if (child is NoteView) {
+                    child.setOnClickListener {
+                        onNoteClick(child.data)
+                    }
+                }
+            }
         }
     }
 }
