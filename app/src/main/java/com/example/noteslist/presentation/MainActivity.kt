@@ -1,61 +1,56 @@
 package com.example.noteslist.presentation
 
 import android.os.Bundle
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.noteslist.R
 import com.example.noteslist.data.repositories.NotesRepositoryImpl
-import com.example.noteslist.domain.models.Note
-import com.example.noteslist.presentation.notes_list.recycler_view.NoteListItem
-import com.example.noteslist.presentation.notes_list.recycler_view.NoteListMapper
+import com.example.noteslist.presentation.notes_list.NotesListViewModel
+import com.example.noteslist.presentation.notes_list.recycler_view.NoteSpaceItemDecoration
 import com.example.noteslist.presentation.notes_list.recycler_view.NotesAdapter
+import com.example.noteslist.presentation.notes_list.recycler_view.RelativeDateFormatter
 import com.example.noteslist.presentation.notes_list.recycler_view.delegates.DateHeaderDelegate
 import com.example.noteslist.presentation.notes_list.recycler_view.delegates.NoteDelegate
-import com.example.noteslist.presentation.notes_list.recycler_view.NoteSpaceItemDecoration
-import com.example.noteslist.presentation.notes_list.recycler_view.RelativeDateFormatter
 import com.example.noteslist.presentation.notes_list.recycler_view.delegates.NoteStackDelegate
-import java.time.LocalDate
+import com.example.noteslist.presentation.notes_list.recycler_view.mapper.NoteListMapper
+import com.example.noteslist.presentation.notes_list.recycler_view.mapper.NoteStackStateManager
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
-    private val repository = NotesRepositoryImpl()
-    private val mapper = NoteListMapper(RelativeDateFormatter(this))
-    private val expandedDateStacks = mutableSetOf<LocalDate>()
+    private val viewModel: NotesListViewModel by viewModels {
+        object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                val repo = NotesRepositoryImpl()
+                val stateManager = NoteStackStateManager()
+                val mapper = NoteListMapper(
+                    dateFormatter = RelativeDateFormatter(
+                        this@MainActivity.applicationContext
+                    ),
+                    stateProvider = stateManager
+                )
 
-    private var cachedNotes: List<Note> = emptyList()
-
-    private fun onNoteClick(clickedNote: Note){
-        val updatedNote = clickedNote.copy(isRead = !clickedNote.isRead)
-        repository.updateNote(updatedNote)
-        loadData()
-    }
-
-    private fun onStackClick(date: LocalDate){
-        if (expandedDateStacks.contains(date)){
-            expandedDateStacks.remove(date)
-        } else {
-            expandedDateStacks.add(date)
+                return NotesListViewModel(repo, mapper, stateManager) as T
+            }
         }
-        updateUI()
     }
-
-    private fun updateUI(){
-        val items = mapper.mapToAdapterItems(cachedNotes, expandedDateStacks)
-
-        val currentDates = items.filterIsInstance<NoteListItem.NoteStack>().map { it.date }.toSet()
-        expandedDateStacks.retainAll(currentDates)
-
-        adapter.submitList(items)
-    }
-
-    private val adapter = NotesAdapter(
+    private val adapter by lazy {
+        NotesAdapter(
             listOf(
                 DateHeaderDelegate(),
-                NoteDelegate(::onNoteClick),
-                NoteStackDelegate(::onNoteClick, ::onStackClick)
+                NoteDelegate { viewModel.onNoteClick(it) },
+                NoteStackDelegate(
+                    onNoteClick = { viewModel.onNoteClick(it) },
+                    onStackClick = { viewModel.onStackClick(it) }
+                )
             )
         )
+    }
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -63,7 +58,15 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         setupRecyclerView()
-        loadData()
+        collectData()
+    }
+
+    private fun collectData(){
+        lifecycleScope.launch {
+            viewModel.items.collect {
+                adapter.submitList(it)
+            }
+        }
     }
 
     private fun setupRecyclerView() {
@@ -74,10 +77,5 @@ class MainActivity : AppCompatActivity() {
         recyclerView.addItemDecoration(NoteSpaceItemDecoration(spacing))
 
         recyclerView.adapter = adapter
-    }
-
-    private fun loadData() {
-        cachedNotes = repository.getAllNotes()
-        updateUI()
     }
 }
