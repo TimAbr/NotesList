@@ -8,7 +8,6 @@ import com.example.noteslist.presentation.notes_list.recycler_view.NoteListItem
 import com.example.noteslist.presentation.notes_list.recycler_view.mapper.NoteStackKey
 import com.example.noteslist.presentation.notes_list.views.note.NoteView
 import com.example.noteslist.presentation.notes_list.views.notes_stack.NoteStackView
-import java.time.LocalDate
 
 class NoteStackDelegate(
     private val onNoteClick: (Note)-> Unit,

@@ -2,7 +2,6 @@ package com.example.noteslist.presentation.notes_list.recycler_view
 
 import com.example.noteslist.domain.models.Note
 import com.example.noteslist.presentation.notes_list.recycler_view.mapper.NoteStackKey
-import java.time.LocalDate
 
 sealed class NoteListItem {
     data class DateHeader(val title: String) : NoteListItem()

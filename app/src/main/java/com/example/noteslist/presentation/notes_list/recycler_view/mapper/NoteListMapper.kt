@@ -3,8 +3,6 @@ package com.example.noteslist.presentation.notes_list.recycler_view.mapper
 import com.example.noteslist.domain.models.Note
 import com.example.noteslist.presentation.notes_list.NoteDateFormatter
 import com.example.noteslist.presentation.notes_list.recycler_view.NoteListItem
-import java.time.Instant
-import java.time.LocalDate
 import java.time.ZoneId
 
 class NoteListMapper(
