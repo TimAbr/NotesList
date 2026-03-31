@@ -61,11 +61,12 @@ class NoteStackView @JvmOverloads constructor(
 
             if (currentNoteCount > targetCount) {
                 for (i in currentNoteCount - 1 downTo targetCount) {
-                    removeViewAt(i)
+                    removeView(noteViews[i])
                 }
             }
             val styledContext = ContextThemeWrapper(context, R.style.NoteStyle)
-            notes.forEachIndexed { index, note ->
+
+            value.forEachIndexed { index, note ->
                 val noteView = if (index < noteViews.size) {
                     noteViews[index]
                 } else {
@@ -102,12 +103,6 @@ class NoteStackView @JvmOverloads constructor(
 
         ensureSortedNotes()
         updateInternalViews()
-
-        setOnClickListener {
-            if (!isExpanded && notes.size > 1) {
-                isExpanded = true
-            }
-        }
     }
 
     private fun createEmptyView() = LayoutInflater
@@ -116,6 +111,14 @@ class NoteStackView @JvmOverloads constructor(
         .apply {
             visibility = GONE
         }
+
+    fun setCollapseButtonOnClickListener(
+        onCollapse:() -> Unit
+    ){
+        collapseButton.setOnClickListener {
+            onCollapse()
+        }
+    }
 
     private fun createCollapseButton(@ColorInt buttonColor: Int) = TextView(context).apply {
         val label = context.getString(R.string.note_stack_collapse_label)
@@ -127,10 +130,7 @@ class NoteStackView @JvmOverloads constructor(
             PADDING_HORIZONTAL,
             PADDING_VERTICAL
         )
-        visibility = GONE
-        setOnClickListener {
-            isExpanded = false
-        }
+        visibility = if (_isExpanded) VISIBLE else GONE
     }
 
     override fun onViewAdded(child: View?) {
