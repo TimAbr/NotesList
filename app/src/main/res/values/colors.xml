@@ -13,4 +13,8 @@
 
     <color name="note_star_color">#FFB900</color>
     <color name="note_checkmark_color">#2E7D32</color>
+
+    <color name="date_header_background">#F2F2F2</color>
+    <color name="date_header_stroke">#E0E0E0</color>
+    <color name="date_header_text">#424242</color>
 </resources>

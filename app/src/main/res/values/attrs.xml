@@ -18,4 +18,12 @@
         <attr name="noteBody" format="string" />
         <attr name="noteDate" format="string" />
     </declare-styleable>
+
+    <declare-styleable name="NoteStackView">
+        <attr name="stackSpacing" format="dimension" />
+        <attr name="stackMaxVisible" format="integer" />
+        <attr name="isExpanded" format="boolean" />
+        <attr name="stackExpandedSpacing" format="dimension" />
+        <attr name="collapseButtonColor" format="color" />
+    </declare-styleable>
 </resources>
