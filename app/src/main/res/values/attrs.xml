@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="NoteView">
+        <attr name="isRead" format="boolean" />
+        <attr name="isImportant" format="boolean" />
+        <attr name="noteHeaderColor" format="color" />
+        <attr name="noteBackgroundColor" format="color" />
+        <attr name="noteTitleColor" format="color" />
+        <attr name="noteTextColor" format="color" />
+        <attr name="noteCornerRadius" format="dimension" />
+        <attr name="noteElevation" format="dimension" />
+        <attr name="noteTitleTextSize" format="dimension" />
+        <attr name="noteBodyTextSize" format="dimension" />
+        <attr name="noteDateTextSize" format="dimension" />
+        <attr name="noteReadStyle" format="reference" />
+        <attr name="noteUnreadStyle" format="reference" />
+        <attr name="noteTitle" format="string" />
+        <attr name="noteBody" format="string" />
+        <attr name="noteDate" format="string" />
+    </declare-styleable>
+
+    <declare-styleable name="NoteStackView">
+        <attr name="stackSpacing" format="dimension" />
+        <attr name="stackMaxVisible" format="integer" />
+        <attr name="isExpanded" format="boolean" />
+        <attr name="stackExpandedSpacing" format="dimension" />
+        <attr name="collapseButtonColor" format="color" />
+    </declare-styleable>
+</resources>
