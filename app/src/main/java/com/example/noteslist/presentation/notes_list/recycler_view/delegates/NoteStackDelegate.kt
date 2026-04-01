@@ -5,12 +5,14 @@ import androidx.core.view.children
 import androidx.recyclerview.widget.RecyclerView
 import com.example.noteslist.domain.models.Note
 import com.example.noteslist.presentation.notes_list.recycler_view.NoteListItem
+import com.example.noteslist.presentation.notes_list.recycler_view.NoteStackPayload
 import com.example.noteslist.presentation.notes_list.recycler_view.mapper.NoteStackKey
 import com.example.noteslist.presentation.notes_list.views.note.NoteView
 import com.example.noteslist.presentation.notes_list.views.notes_stack.NoteStackView
+import com.example.noteslist.presentation.notes_list.views.notes_stack.animation.StackAnimationType
 
 class NoteStackDelegate(
-    private val onNoteClick: (Note)-> Unit,
+    private val onNoteClick: (Long)-> Unit,
     private val onStackClick: (NoteStackKey)->Unit
 ) : NoteListItemDelegate {
     override fun isForViewType(item: NoteListItem) = item is NoteListItem.NoteStack
@@ -22,33 +24,70 @@ class NoteStackDelegate(
                 ViewGroup.LayoutParams.WRAP_CONTENT
             )
         }
-        return StackViewHolder(stackView, onNoteClick, onStackClick)
+        val holder = StackViewHolder(stackView, onNoteClick)
+        stackView.setOnClickListener {
+            (stackView.tag as? NoteStackKey)?.let(onStackClick)
+        }
+        stackView.setCollapseButtonOnClickListener {
+            (stackView.tag as? NoteStackKey)?.let(onStackClick)
+        }
+        return holder
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, item: NoteListItem) {
-        (holder as StackViewHolder).bind(item as NoteListItem.NoteStack)
+        (holder as StackViewHolder).bind(
+            item = item as NoteListItem.NoteStack,
+            animation = null,
+            notesChanged = true
+        )
+    }
+
+    override fun onBindViewHolder(
+        holder: RecyclerView.ViewHolder,
+        item: NoteListItem,
+        payloads: List<Any>
+    ) {
+        if (payloads.isEmpty()) {
+            onBindViewHolder(holder, item)
+        } else {
+            val payload = payloads.firstOrNull() as? NoteStackPayload
+            (holder as StackViewHolder).bind(
+                item = item as NoteListItem.NoteStack, 
+                animation = payload?.animationType,
+                notesChanged = payload?.notesChanged ?: true
+            )
+        }
     }
 
     class StackViewHolder(
         private val stackView: NoteStackView,
-        private val onNoteClick: (Note)-> Unit,
-        private val onStackClick: (NoteStackKey)->Unit
+        private val onNoteClick: (Long)-> Unit
     ) : RecyclerView.ViewHolder(stackView) {
-        fun bind(item: NoteListItem.NoteStack) {
-            stackView.notes = item.notes
-            stackView.children.forEach { child ->
-                if (child is NoteView) {
-                    child.setOnClickListener {
-                        onNoteClick(child.data)
+
+        fun bind(
+            item: NoteListItem.NoteStack, 
+            animation: StackAnimationType? = null,
+            notesChanged: Boolean = true
+        ) {
+            stackView.tag = item.key
+            
+            if (notesChanged) {
+                stackView.notes = item.notes
+                stackView.children.forEach { child ->
+                    if (child is NoteView) {
+                        child.setOnClickListener {
+                            onNoteClick(child.data.id)
+                        }
                     }
                 }
             }
-            stackView.isExpanded = item.isExpanded
-            stackView.setOnClickListener {
-                onStackClick(item.key)
-            }
-            stackView.setCollapseButtonOnClickListener {
-                onStackClick(item.key)
+            
+            if (animation == StackAnimationType.EXPAND) {
+                stackView.expand()
+            } else if (animation == StackAnimationType.COLLAPSE) {
+                stackView.collapse()
+            } else {
+                stackView.isExpanded = item.isExpanded
             }
         }
     }

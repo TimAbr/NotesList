@@ -19,11 +19,15 @@ class NotesListViewModel(
     private val _items = MutableStateFlow<List<NoteListItem>>(emptyList())
     val items = _items.asStateFlow()
 
+    private var cachedNotes: List<Note> = emptyList()
+
+
     init {
         updateList()
     }
 
-    fun onNoteClick(note: Note) {
+    fun onNoteClick(id: Long) {
+        val note = cachedNotes.find { it.id == id } ?: return
         val updatedNote = note.copy(isRead = !note.isRead)
         repository.updateNote(updatedNote)
         updateList()
@@ -31,11 +35,16 @@ class NotesListViewModel(
 
     fun onStackClick(key: NoteStackKey) {
         stateManager.toggle(key)
-        updateList()
+        mapList(cachedNotes)
     }
 
     private fun updateList() {
         val notes = repository.getAllNotes()
-        _items.value = mapper.mapToAdapterItems(notes)
+        cachedNotes = notes
+        mapList(notes)
+    }
+
+    private fun mapList(list: List<Note>){
+        _items.value = mapper.mapToAdapterItems(list)
     }
 }

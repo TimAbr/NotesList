@@ -9,7 +9,7 @@ import com.example.noteslist.presentation.notes_list.recycler_view.NoteListItem
 import com.example.noteslist.presentation.notes_list.views.note.NoteView
 
 class NoteDelegate(
-    private val onNoteClick: (Note)-> Unit
+    private val onNoteClick: (Long)-> Unit
 ) : NoteListItemDelegate {
     override fun isForViewType(item: NoteListItem) = item is NoteListItem.SingleNote
 
@@ -24,7 +24,10 @@ class NoteDelegate(
                 ViewGroup.LayoutParams.WRAP_CONTENT
             )
         }
-        return NoteViewHolder(noteView, onNoteClick)
+        noteView.setOnClickListener {
+            onNoteClick(noteView.data.id)
+        }
+        return NoteViewHolder(noteView)
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, item: NoteListItem) {
@@ -32,15 +35,10 @@ class NoteDelegate(
     }
 
     class NoteViewHolder(
-        private val noteView: NoteView,
-        private val onNoteClick: (Note)-> Unit
+        private val noteView: NoteView
     ) : RecyclerView.ViewHolder(noteView) {
         fun bind(item: NoteListItem.SingleNote) {
             noteView.data = item.note
-
-            noteView.setOnClickListener {
-                onNoteClick(item.note)
-            }
         }
     }
 }

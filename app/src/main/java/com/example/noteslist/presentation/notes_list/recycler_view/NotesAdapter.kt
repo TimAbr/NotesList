@@ -5,6 +5,12 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.noteslist.presentation.notes_list.recycler_view.delegates.NoteListItemDelegate
+import com.example.noteslist.presentation.notes_list.views.notes_stack.animation.StackAnimationType
+
+data class NoteStackPayload(
+    val animationType: StackAnimationType?,
+    val notesChanged: Boolean
+)
 
 class NotesAdapter(
     private val delegates: List<NoteListItemDelegate>
@@ -27,6 +33,19 @@ class NotesAdapter(
         delegates[getItemViewType(position)].onBindViewHolder(holder, item)
     }
 
+    override fun onBindViewHolder(
+        holder: RecyclerView.ViewHolder,
+        position: Int,
+        payloads: MutableList<Any>
+    ) {
+        if (payloads.isEmpty()) {
+            super.onBindViewHolder(holder, position, payloads)
+        } else {
+            val item = getItem(position)
+            delegates[getItemViewType(position)].onBindViewHolder(holder, item, payloads)
+        }
+    }
+
     class NoteDiffCallback : DiffUtil.ItemCallback<NoteListItem>() {
         override fun areItemsTheSame(oldItem: NoteListItem, newItem: NoteListItem): Boolean {
             return when {
@@ -42,6 +61,25 @@ class NotesAdapter(
 
         override fun areContentsTheSame(oldItem: NoteListItem, newItem: NoteListItem): Boolean {
             return oldItem == newItem
+        }
+
+        override fun getChangePayload(oldItem: NoteListItem, newItem: NoteListItem): Any? {
+            if (oldItem is NoteListItem.NoteStack && newItem is NoteListItem.NoteStack) {
+                val expandedChanged = oldItem.isExpanded != newItem.isExpanded
+                val notesChanged = oldItem.notes != newItem.notes
+                
+                if (expandedChanged || notesChanged) {
+                    val animationType = if (expandedChanged) {
+                        if (newItem.isExpanded) StackAnimationType.EXPAND else StackAnimationType.COLLAPSE
+                    } else null
+                    
+                    return NoteStackPayload(
+                        animationType = animationType,
+                        notesChanged = notesChanged
+                    )
+                }
+            }
+            return super.getChangePayload(oldItem, newItem)
         }
     }
 }

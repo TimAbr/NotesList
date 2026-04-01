@@ -66,26 +66,25 @@ class NoteStackViewLayoutManager {
             val note = notes[i]
             val reverseIndex = notes.size - 1 - i
 
-            if (reverseIndex < actualVisible) {
-                note.visibility = View.VISIBLE
-
-                val visualIndex = (actualVisible - 1) - reverseIndex
-                val offset = visualIndex * config.stackSpacing
-
-                val left = paddings.paddingLeft + offset
-                val top = paddings.paddingTop + offset
-
-                note.layout(
-                    left,
-                    top,
-                    left + note.measuredWidth,
-                    top + note.measuredHeight
-                )
-
-                note.translationZ = (notes.size - reverseIndex).toFloat()
+            val visualIndex = if (reverseIndex < actualVisible) {
+                (actualVisible - 1) - reverseIndex 
             } else {
-                note.visibility = View.GONE
+                0
             }
+            
+            val offset = visualIndex * config.stackSpacing
+
+            val left = paddings.paddingLeft + offset
+            val top = paddings.paddingTop + offset
+
+            note.layout(
+                left,
+                top,
+                left + note.measuredWidth,
+                top + note.measuredHeight
+            )
+            
+            note.translationZ = (notes.size - reverseIndex).toFloat()
         }
     }
 
@@ -99,7 +98,6 @@ class NoteStackViewLayoutManager {
 
         notes.forEach { note ->
             note.visibility = View.VISIBLE
-            note.translationZ = 0f
             note.layout(
                 paddings.paddingLeft,
                 currentTop,

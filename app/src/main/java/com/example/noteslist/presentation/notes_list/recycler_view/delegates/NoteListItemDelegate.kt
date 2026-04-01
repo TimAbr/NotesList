@@ -8,4 +8,10 @@ interface NoteListItemDelegate {
     fun isForViewType(item: NoteListItem): Boolean
     fun onCreateViewHolder(parent: ViewGroup): RecyclerView.ViewHolder
     fun onBindViewHolder(holder: RecyclerView.ViewHolder, item: NoteListItem)
+
+    fun onBindViewHolder(holder: RecyclerView.ViewHolder, item: NoteListItem, payloads: List<Any>) {
+        if (payloads.isEmpty()) {
+            onBindViewHolder(holder, item)
+        }
+    }
 }
