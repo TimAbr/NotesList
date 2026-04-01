@@ -37,7 +37,6 @@ class NoteStackView @JvmOverloads constructor(
         paddingRight = paddingRight
     )
 
-
     private val animator: NoteStackAnimator
     private var _isExpanded = false
     var isExpanded
@@ -108,7 +107,7 @@ class NoteStackView @JvmOverloads constructor(
         addView(emptyView)
         addView(collapseButton)
 
-        animator = NoteStackAnimator(this, measurer, config, paddings)
+        animator = NoteStackAnimator(this, measurer, layoutManager, config, paddings)
 
         ensureSortedNotes()
         updateInternalViews()
@@ -245,9 +244,6 @@ class NoteStackView @JvmOverloads constructor(
             collapseButton.visibility = GONE
         }
     }
-
-    
-
 
     companion object {
         private const val PADDING_HORIZONTAL = 20

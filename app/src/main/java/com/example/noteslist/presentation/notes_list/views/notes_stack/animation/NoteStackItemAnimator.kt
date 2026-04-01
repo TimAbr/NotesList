@@ -2,154 +2,164 @@ package com.example.noteslist.presentation.notes_list.views.notes_stack.animatio
 
 import android.view.View
 import android.view.animation.Interpolator
-import android.view.animation.LinearInterpolator
+import com.example.noteslist.presentation.notes_list.views.ViewPaddings
 import com.example.noteslist.presentation.notes_list.views.note.NoteView
+import com.example.noteslist.presentation.notes_list.views.notes_stack.NoteStackViewConfig
+import com.example.noteslist.presentation.notes_list.views.notes_stack.NoteStackViewLayoutManager
 
 class NoteStackItemAnimator(
     private val interpolator: Interpolator,
-    private val durationCalculator: (Int) -> Long
+    private val layoutManager: NoteStackViewLayoutManager
 ) {
-    fun animateCollapseButtonFadeOut(button: View, onEnd: () -> Unit) {
-        button.visibility = View.GONE
-        onEnd()
-    }
 
     fun animateExpand(
         notes: List<NoteView>,
         collapseButton: View,
-        initialTops: List<Int>,
-        initialLefts: List<Int>,
-        initialScale: Float,
-        onEnd: () -> Unit
+        config: NoteStackViewConfig,
+        paddings: ViewPaddings,
+        stackWidth: Int,
+        timing: NoteStackAnimationTiming
     ) {
         val n = notes.size
-        val elementDuration = durationCalculator(n)
-        var maxEndTime = 0L
+        val actualVisible = minOf(n, config.stackMaxVisible)
+        val collapsedScale = layoutManager.calculateCollapsedScale(stackWidth, paddings, config, n)
 
         notes.forEachIndexed { i, note ->
-            val reverseIndex = n - 1 - i
-            val delay = reverseIndex * STAGGER_STEP_MS
+            val reverseIndex = (n - 1) - i
+            val delay = reverseIndex * timing.staggerDelay
             
-            val currentTop = note.top
-            val startTop = initialTops[i]
-            val currentLeft = note.left
-            val startLeft = initialLefts[i]
-
-            val startZ = (n - reverseIndex).toFloat()
-            note.translationZ = startZ
-            note.translationY = (startTop - currentTop).toFloat()
-            note.translationX = (startLeft - currentLeft).toFloat()
+            val initialTop = layoutManager.calculateCollapsedTop(reverseIndex, actualVisible, config.stackSpacing, paddings.paddingTop)
+            val initialLeft = layoutManager.calculateCollapsedLeft(reverseIndex, actualVisible, config.stackSpacing, paddings.paddingLeft)
             
-            note.pivotX = 0f
-            note.scaleX = initialScale
-            
-            if (note.alpha != 1f) {
-                note.alpha = 1f
-            }
-            
-            note.animate()
-                .translationY(0f)
-                .translationX(0f)
-                .scaleX(1.0f)
-                .translationZ(0f)
-                .setStartDelay(delay)
-                .setDuration(elementDuration)
-                .setInterpolator(interpolator)
-                .start()
-                
-            val endTime = delay + elementDuration
-            if (endTime > maxEndTime) {
-                maxEndTime = endTime
-            }
+            setupExpandStart(note, initialTop, initialLeft, collapsedScale, n - reverseIndex)
+            animateNoteToExpand(note, delay, timing.itemDuration)
         }
 
-        val buttonDelay = maxEndTime + BUTTON_APPEAR_DELAY_MS
-        
-        collapseButton.alpha = BUTTON_START_ALPHA
-        collapseButton.scaleX = BUTTON_START_SCALE
-        collapseButton.scaleY = BUTTON_START_SCALE
-        collapseButton.visibility = View.VISIBLE
-        
-        collapseButton.animate()
-            .alpha(BUTTON_END_ALPHA)
-            .scaleX(BUTTON_END_SCALE)
-            .scaleY(BUTTON_END_SCALE)
-            .setStartDelay(buttonDelay)
-            .setDuration(BUTTON_FADE_DURATION_MS)
-            .setInterpolator(interpolator)
-            .withEndAction {
-                onEnd()
-            }
-            .start()
+        animateCollapseButtonIn(collapseButton, timing.buttonStartDelay)
     }
 
     fun animateCollapse(
         notes: List<NoteView>,
         expandedTops: List<Int>,
-        targetTops: List<Int>,
-        targetLefts: List<Int>,
-        targetScale: Float,
+        config: NoteStackViewConfig,
+        paddings: ViewPaddings,
+        stackWidth: Int,
+        timing: NoteStackAnimationTiming,
         onEnd: () -> Unit
     ) {
         val n = notes.size
-        val elementDuration = durationCalculator(n)
-        
-        var maxEndTime = 0L
+        val actualVisible = minOf(n, config.stackMaxVisible)
+        val targetScale = layoutManager.calculateCollapsedScale(stackWidth, paddings, config, n)
 
         notes.forEachIndexed { i, note ->
-            val reverseIndex = n - 1 - i
-            val delay = reverseIndex * STAGGER_STEP_MS
+            val reverseIndex = (n - 1) - i
+            val delay = reverseIndex * timing.staggerDelay
+            val isHiddenInStack = reverseIndex >= actualVisible
             
-            val startExpandedTop = expandedTops[i]
-            val endCollapsedTop = targetTops[i]
-            val currentCollapsedTop = note.top
-            val currentCollapsedLeft = note.left
-            val endCollapsedLeft = targetLefts[i]
-            
-            note.visibility = View.VISIBLE
-            
-            val endZ = (n - reverseIndex).toFloat()
-            note.translationZ = endZ
-            note.translationY = (startExpandedTop - currentCollapsedTop).toFloat()
-            note.translationX = 0f
-            
-            note.pivotX = 0f
-            note.scaleX = 1f
+            val targetTop = layoutManager.calculateCollapsedTop(reverseIndex, actualVisible, config.stackSpacing, paddings.paddingTop)
+            val targetLeft = layoutManager.calculateCollapsedLeft(reverseIndex, actualVisible, config.stackSpacing, paddings.paddingLeft)
 
-            note.animate()
-                .translationY((endCollapsedTop - currentCollapsedTop).toFloat())
-                .translationX((endCollapsedLeft - currentCollapsedLeft).toFloat())
-                .scaleX(targetScale)
-                .setStartDelay(delay)
-                .setDuration(elementDuration)
-                .setInterpolator(interpolator)
-                .withEndAction {
-                    if (currentCollapsedTop != endCollapsedTop) {
-                        note.visibility = View.GONE
-                    }
-                    if (i == 0) {
-                        onEnd()
-                    }
-                }
-                .start()
-                
-            val endTime = delay + elementDuration
-            if (endTime > maxEndTime) {
-                maxEndTime = endTime
-            }
+            setupCollapseStart(note, expandedTops[i])
+            animateNoteToCollapse(
+                note,
+                targetTop,
+                targetLeft,
+                targetScale,
+                delay,
+                timing.itemDuration,
+                n - reverseIndex,
+                isHiddenInStack,
+                i == 0,
+                onEnd
+            )
         }
     }
 
-    companion object {
-        private const val STAGGER_STEP_MS = 20L
-        
-        private const val BUTTON_APPEAR_DELAY_MS = 100L
-        private const val BUTTON_FADE_DURATION_MS = 200L
-        
-        private const val BUTTON_START_ALPHA = 0f
-        private const val BUTTON_END_ALPHA = 1f
-        
-        private const val BUTTON_START_SCALE = 0.7f
-        private const val BUTTON_END_SCALE = 1.0f
+    fun animateCollapseButtonFadeOut(button: View) {
+        button.animate()
+            .alpha(0f)
+            .scaleX(0.7f)
+            .scaleY(0.7f)
+            .setDuration(200L)
+            .setInterpolator(interpolator)
+            .withEndAction {
+                button.visibility = View.GONE
+            }
+            .start()
+    }
+
+    private fun setupExpandStart(note: NoteView, initialTop: Int, initialLeft: Int, scale: Float, z: Int) {
+        note.visibility = View.VISIBLE
+        note.translationY = (initialTop - note.top).toFloat()
+        note.translationX = (initialLeft - note.left).toFloat()
+        note.scaleX = scale
+        note.pivotX = 0f
+        note.translationZ = z.toFloat()
+        note.alpha = 1f
+    }
+
+    private fun animateNoteToExpand(note: NoteView, delay: Long, duration: Long) {
+        note.animate()
+            .translationY(0f)
+            .translationX(0f)
+            .scaleX(1.0f)
+            .alpha(1f)
+            .translationZ(0f)
+            .setStartDelay(delay)
+            .setDuration(duration)
+            .setInterpolator(interpolator)
+            .start()
+    }
+
+    private fun setupCollapseStart(note: NoteView, expandedTop: Int) {
+        note.visibility = View.VISIBLE
+        note.translationY = (expandedTop - note.top).toFloat()
+        note.translationX = 0f
+        note.scaleX = 1f
+        note.pivotX = 0f
+        note.alpha = 1f
+    }
+
+    private fun animateNoteToCollapse(
+        note: NoteView,
+        targetTop: Int,
+        targetLeft: Int,
+        targetScale: Float,
+        delay: Long,
+        duration: Long,
+        z: Int,
+        isHidden: Boolean,
+        isLast: Boolean,
+        onEnd: () -> Unit
+    ) {
+        note.translationZ = z.toFloat()
+        note.animate()
+            .translationY((targetTop - note.top).toFloat())
+            .translationX((targetLeft - note.left).toFloat())
+            .scaleX(targetScale)
+            .alpha(1f)
+            .setStartDelay(delay)
+            .setDuration(duration)
+            .setInterpolator(interpolator)
+            .withEndAction {
+                if (isHidden) note.visibility = View.GONE
+                if (isLast) onEnd()
+            }
+            .start()
+    }
+
+    private fun animateCollapseButtonIn(button: View, delay: Long) {
+        button.alpha = 0f
+        button.scaleX = 0.7f
+        button.scaleY = 0.7f
+        button.visibility = View.VISIBLE
+        button.animate()
+            .alpha(1f)
+            .scaleX(1f)
+            .scaleY(1f)
+            .setStartDelay(delay)
+            .setDuration(NoteStackAnimationTiming.BUTTON_ANIMATION_DURATION_MS)
+            .setInterpolator(interpolator)
+            .start()
     }
 }

@@ -38,6 +38,22 @@ class NotesRepositoryImpl : NotesRepository {
             isImportant = false,
             isRead = false
         ),
+        Note(
+            id = 11,
+            title = "ДЗ по Android",
+            text = "Реализовать NoteView и кастомный ViewGroup для стека заметок. Не забыть про onLayout.",
+            timestamp = now.minusSeconds(500),
+            isImportant = false,
+            isRead = true
+        ),
+        Note(
+            id = 12,
+            title = "Идея для пет-проекта",
+            text = "Приложение для отслеживания полива домашних растений с уведомлениями",
+            timestamp = now.minusSeconds(1000),
+            isImportant = false,
+            isRead = false
+        ),
 
         Note(
             id = 4,
