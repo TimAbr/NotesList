@@ -1,5 +1,6 @@
 package com.example.noteslist.presentation.note_details
 
+import android.content.res.Configuration
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -16,12 +17,19 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -31,7 +39,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -60,6 +70,55 @@ fun NoteDetailsScreen(
         onBack = onBack,
         modifier = modifier
     )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun NoteDetailsBase(
+    state: NoteDetailsScreenState,
+    onTitleChange: (String) -> Unit,
+    onTextChange: (String) -> Unit,
+    onImportantToggle: (Boolean) -> Unit,
+    onReadToggle: (Boolean) -> Unit,
+    onSave: () -> Boolean,
+    onBack: () -> Unit,
+    modifier: Modifier = Modifier
+){
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        stringResource(
+                            if (state.mode is NoteDetailsScreenMode.Edit)
+                                R.string.edit_note
+                            else
+                                R.string.add_note
+                        )
+                    )
+                },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_back_note_details),
+                            contentDescription = "Back"
+                        )
+                    }
+                }
+            )
+        }
+    ) { paddingValues ->
+        NoteDetailsContent(
+            state = state,
+            onTitleChange = onTitleChange,
+            onTextChange = onTextChange,
+            onImportantToggle = onImportantToggle,
+            onReadToggle = onReadToggle,
+            onSave = onSave,
+            modifier = modifier.padding(paddingValues),
+            onBack = onBack
+        )
+    }
 }
 
 @Composable
@@ -149,6 +208,8 @@ fun NoteTitleInput(
         }
     }
 }
+
+
 
 @Composable
 fun NoteTextInput(
@@ -284,14 +345,14 @@ fun SaveButton(
 @Composable
 fun NoteDetailsCreatePreview() {
     NotesListTheme {
-        NoteDetailsContent(
+        NoteDetailsBase(
             state = NoteDetailsScreenState(mode = NoteDetailsScreenMode.Create),
             onTitleChange = {},
             onTextChange = {},
             onImportantToggle = {},
             onReadToggle = {},
             onSave = {true},
-            onBack = {}
+            onBack = {},
         )
     }
 }
@@ -300,7 +361,7 @@ fun NoteDetailsCreatePreview() {
 @Composable
 fun NoteDetailsEditPreview() {
     NotesListTheme {
-        NoteDetailsContent(
+        NoteDetailsBase(
             state = NoteDetailsScreenState(
                 title = "Тестовая заметка",
                 text = "Текст тестовой заметки",
@@ -315,7 +376,7 @@ fun NoteDetailsEditPreview() {
             onImportantToggle = {},
             onReadToggle = {},
             onSave = {true},
-            onBack = {}
+            onBack = {},
         )
     }
 

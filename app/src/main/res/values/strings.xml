@@ -17,4 +17,6 @@
     <string name="note_read">Прочитано 📖</string>
     <string name="note_not_read">Не прочитано 📘</string>
     <string name="read_toggle_hint">Зажмите, чтобы изменить</string>
+    <string name="edit_note">Редактировать</string>
+    <string name="add_note">Создать</string>
 </resources>
