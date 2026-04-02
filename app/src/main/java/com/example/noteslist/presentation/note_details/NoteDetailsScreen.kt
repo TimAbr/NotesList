@@ -11,11 +11,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
@@ -28,7 +30,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
@@ -37,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.noteslist.R
+import com.example.noteslist.presentation.common.theme.NotesListTheme
 import kotlinx.coroutines.delay
 import java.time.Instant
 
@@ -75,7 +77,6 @@ fun NoteDetailsContent(
             .fillMaxSize()
             .padding(16.dp)
             .verticalScroll(scrollState),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         NoteTitleInput(
             title = state.title,
@@ -83,21 +84,29 @@ fun NoteDetailsContent(
             onTitleChange = onTitleChange
         )
 
+        Spacer(Modifier.height(16.dp))
+
         NoteTextInput(
             text = state.text,
             onTextChange = onTextChange
         )
+
+        Spacer(Modifier.height(8.dp))
 
         ImportantToggle(
             isImportant = state.isImportant,
             onToggle = onImportantToggle
         )
 
+        Spacer(Modifier.height(8.dp))
+
         if (state.mode is NoteDetailsScreenMode.Edit) {
             ReadStatusSection(
                 isRead = state.isRead,
                 onReadToggle = onReadToggle
             )
+
+            Spacer(Modifier.height(20.dp))
 
             TimestampLabel(formattedDate = state.formattedDate)
         }
@@ -152,6 +161,7 @@ fun NoteTextInput(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ImportantToggle(
     isImportant: Boolean,
@@ -165,10 +175,12 @@ fun ImportantToggle(
             text = stringResource(R.string.note_details_important_label),
             modifier = Modifier.weight(1f)
         )
+
         Switch(
             checked = isImportant,
             onCheckedChange = onToggle
         )
+
     }
 }
 
@@ -210,7 +222,7 @@ fun ReadStatusSection(
                 else
                     stringResource(R.string.note_not_read),
                 style = MaterialTheme.typography.bodyMedium,
-                color = if (isRead) Color(0xFF4CAF50) else Color.Gray
+                color = if (isRead) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
             )
         }
 
@@ -222,7 +234,7 @@ fun ReadStatusSection(
             Text(
                 text = stringResource(R.string.read_toggle_hint),
                 style = MaterialTheme.typography.labelSmall,
-                color = Color.Gray,
+                color = MaterialTheme.colorScheme.secondary,
                 fontSize = 10.sp,
             )
         }
@@ -235,7 +247,7 @@ fun TimestampLabel(formattedDate: String) {
         Text(
             text = stringResource(R.string.note_details_created_at_label) + " $formattedDate",
             style = MaterialTheme.typography.bodySmall,
-            color = Color.Gray
+            color = MaterialTheme.colorScheme.secondary
         )
     }
 }
@@ -262,33 +274,38 @@ fun SaveButton(
 @Preview(showBackground = true)
 @Composable
 fun NoteDetailsCreatePreview() {
-    NoteDetailsContent(
-        state = NoteDetailsScreenState(mode = NoteDetailsScreenMode.Create),
-        onTitleChange = {},
-        onTextChange = {},
-        onImportantToggle = {},
-        onReadToggle = {},
-        onSave = {}
-    )
+    NotesListTheme {
+        NoteDetailsContent(
+            state = NoteDetailsScreenState(mode = NoteDetailsScreenMode.Create),
+            onTitleChange = {},
+            onTextChange = {},
+            onImportantToggle = {},
+            onReadToggle = {},
+            onSave = {}
+        )
+    }
 }
 
 @Preview(showBackground = true)
 @Composable
 fun NoteDetailsEditPreview() {
-    NoteDetailsContent(
-        state = NoteDetailsScreenState(
-            title = "Тестовая заметка",
-            text = "Текст тестовой заметки",
-            isImportant = true,
-            isRead = false,
-            creationTimestamp = Instant.now(),
-            formattedDate = "Сегодня",
-            mode = NoteDetailsScreenMode.Edit(1L)
-        ),
-        onTitleChange = {},
-        onTextChange = {},
-        onImportantToggle = {},
-        onReadToggle = {},
-        onSave = {}
-    )
+    NotesListTheme {
+        NoteDetailsContent(
+            state = NoteDetailsScreenState(
+                title = "Тестовая заметка",
+                text = "Текст тестовой заметки",
+                isImportant = true,
+                isRead = false,
+                creationTimestamp = Instant.now(),
+                formattedDate = "Сегодня",
+                mode = NoteDetailsScreenMode.Edit(1L)
+            ),
+            onTitleChange = {},
+            onTextChange = {},
+            onImportantToggle = {},
+            onReadToggle = {},
+            onSave = {}
+        )
+    }
+
 }
