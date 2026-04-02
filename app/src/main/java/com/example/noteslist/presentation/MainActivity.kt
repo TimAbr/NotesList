@@ -9,6 +9,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.noteslist.R
+import com.example.noteslist.data.datasources.notes.local.InMemoryNotesDataSource
 import com.example.noteslist.data.repositories.NotesRepositoryImpl
 import com.example.noteslist.presentation.notes_list.NotesListViewModel
 import com.example.noteslist.presentation.notes_list.recycler_view.NoteSpaceItemDecoration
@@ -26,7 +27,9 @@ class MainActivity : AppCompatActivity() {
     private val viewModel: NotesListViewModel by viewModels {
         object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                val repo = NotesRepositoryImpl()
+                val repo = NotesRepositoryImpl(
+                    dataSource = InMemoryNotesDataSource()
+                )
                 val stateManager = NoteStackStateManager()
                 val mapper = NoteListMapper(
                     dateFormatter = RelativeDateFormatter(
