@@ -67,11 +67,11 @@ class NoteDetailsViewModel(
         _state.update { it.copy(isRead = read) }
     }
 
-    fun onSave() {
+    fun onSave(): Boolean {
         val currentState = _state.value
         if (currentState.title.isBlank()) {
             _state.update { it.copy(titleError = true) }
-            return
+            return false
         }
 
         when (val mode = currentState.mode) {
@@ -99,6 +99,8 @@ class NoteDetailsViewModel(
                 updateNoteUseCase(updatedNote)
             }
         }
+
+        return true
     }
 }
 

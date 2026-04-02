@@ -45,7 +45,8 @@ import java.time.Instant
 @Composable
 fun NoteDetailsScreen(
     viewModel: NoteDetailsViewModel,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onBack: () -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
@@ -56,6 +57,7 @@ fun NoteDetailsScreen(
         onImportantToggle = viewModel::onImportantToggle,
         onReadToggle = viewModel::onReadToggle,
         onSave = viewModel::onSave,
+        onBack = onBack,
         modifier = modifier
     )
 }
@@ -67,7 +69,8 @@ fun NoteDetailsContent(
     onTextChange: (String) -> Unit,
     onImportantToggle: (Boolean) -> Unit,
     onReadToggle: (Boolean) -> Unit,
-    onSave: () -> Unit,
+    onSave: () -> Boolean,
+    onBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val scrollState = rememberScrollState()
@@ -115,7 +118,8 @@ fun NoteDetailsContent(
 
         SaveButton(
             mode = state.mode,
-            onSave = onSave
+            onSave = onSave,
+            onBack = onBack
         )
     }
 }
@@ -255,7 +259,8 @@ fun TimestampLabel(formattedDate: String) {
 @Composable
 fun SaveButton(
     mode: NoteDetailsScreenMode,
-    onSave: () -> Unit
+    onSave: () -> Boolean,
+    onBack: () -> Unit
 ) {
     val buttonText = if (mode is NoteDetailsScreenMode.Edit) {
         stringResource(R.string.note_details_save_edit)
@@ -264,7 +269,11 @@ fun SaveButton(
     }
 
     Button(
-        onClick = onSave,
+        onClick = {
+            if (onSave()){
+                onBack()
+            }
+        },
         modifier = Modifier.fillMaxWidth()
     ) {
         Text(text = buttonText)
@@ -281,7 +290,8 @@ fun NoteDetailsCreatePreview() {
             onTextChange = {},
             onImportantToggle = {},
             onReadToggle = {},
-            onSave = {}
+            onSave = {true},
+            onBack = {}
         )
     }
 }
@@ -304,7 +314,8 @@ fun NoteDetailsEditPreview() {
             onTextChange = {},
             onImportantToggle = {},
             onReadToggle = {},
-            onSave = {}
+            onSave = {true},
+            onBack = {}
         )
     }
 
