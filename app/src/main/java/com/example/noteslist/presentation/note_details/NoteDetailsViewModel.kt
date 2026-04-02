@@ -1,5 +1,6 @@
 package com.example.noteslist.presentation.note_details
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import com.example.noteslist.domain.models.Note
 import com.example.noteslist.domain.usecases.AddNoteUseCase
@@ -13,12 +14,17 @@ import kotlinx.coroutines.flow.update
 import java.time.Instant
 
 class NoteDetailsViewModel(
-    private val mode: NoteDetailsScreenMode,
+    savedStateHandle: SavedStateHandle,
     private val getNoteByIdUseCase: GetNoteByIdUseCase,
     private val addNoteUseCase: AddNoteUseCase,
     private val updateNoteUseCase: UpdateNoteUseCase,
     private val dateFormatter: NoteDateFormatter
 ) : ViewModel() {
+
+
+    private val mode: NoteDetailsScreenMode = NoteDetailsFragmentArgs
+        .fromSavedStateHandle(savedStateHandle)
+        .mode
 
     private val _state = MutableStateFlow(
         when (mode) {
