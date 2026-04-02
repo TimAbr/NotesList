@@ -1,8 +1,7 @@
-package com.example.noteslist.presentation.notes_list.recycler_view
+package com.example.noteslist.presentation.common
 
 import android.content.Context
 import com.example.noteslist.R
-import com.example.noteslist.presentation.notes_list.NoteDateFormatter
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId

@@ -13,7 +13,7 @@ import com.example.noteslist.data.repositories.NotesRepositoryImpl
 import com.example.noteslist.presentation.notes_list.NotesListViewModel
 import com.example.noteslist.presentation.notes_list.recycler_view.NoteSpaceItemDecoration
 import com.example.noteslist.presentation.notes_list.recycler_view.NotesAdapter
-import com.example.noteslist.presentation.notes_list.recycler_view.RelativeDateFormatter
+import com.example.noteslist.presentation.common.RelativeDateFormatter
 import com.example.noteslist.presentation.notes_list.recycler_view.delegates.DateHeaderDelegate
 import com.example.noteslist.presentation.notes_list.recycler_view.delegates.NoteDelegate
 import com.example.noteslist.presentation.notes_list.recycler_view.delegates.NoteStackDelegate

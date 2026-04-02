@@ -1,4 +1,4 @@
-package com.example.noteslist.presentation.notes_list
+package com.example.noteslist.presentation.common
 
 import java.time.Instant
 import java.time.LocalDateTime

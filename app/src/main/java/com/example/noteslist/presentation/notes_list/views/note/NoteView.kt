@@ -7,8 +7,8 @@ import android.util.AttributeSet
 import android.view.View
 import android.view.ViewOutlineProvider
 import com.example.noteslist.domain.models.Note
-import com.example.noteslist.presentation.notes_list.NoteDateFormatter
-import com.example.noteslist.presentation.notes_list.NoteDateFormatterImpl
+import com.example.noteslist.presentation.common.NoteDateFormatter
+import com.example.noteslist.presentation.common.NoteDateFormatterImpl
 import com.example.noteslist.presentation.notes_list.views.ViewPaddings
 
 class NoteView @JvmOverloads constructor(
