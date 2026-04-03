@@ -24,6 +24,7 @@ import com.example.noteslist.presentation.notes_list.recycler_view.delegates.Not
 import com.example.noteslist.presentation.notes_list.recycler_view.delegates.NoteStackDelegate
 import com.example.noteslist.presentation.notes_list.recycler_view.mapper.NoteListMapper
 import com.example.noteslist.presentation.notes_list.recycler_view.mapper.NoteStackStateManager
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.launch
 import kotlin.getValue
 
@@ -56,6 +57,7 @@ class NotesListFragment : Fragment(R.layout.fragment_notes_list) {
         super.onViewCreated(view, savedInstanceState)
 
         setupRecyclerView(view)
+        setupAddNoteButton(view)
         collectData()
     }
 
@@ -77,11 +79,33 @@ class NotesListFragment : Fragment(R.layout.fragment_notes_list) {
         val spacing = resources.getDimensionPixelSize(R.dimen.note_list_spacing)
         recyclerView.addItemDecoration(NoteSpaceItemDecoration(spacing))
         recyclerView.adapter = adapter
+
+        val fab = view.findViewById<FloatingActionButton>(R.id.btnAddNote)
+        recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                if (dy > 0 && fab.isShown) {
+                    fab.hide()
+                } else if (dy < 0 && !fab.isShown) {
+                    fab.show()
+                }
+            }
+        })
+    }
+
+    private fun setupAddNoteButton(view: View) {
+        view.findViewById<FloatingActionButton>(R.id.btnAddNote).setOnClickListener {
+            onAddNoteClick()
+        }
     }
 
     private fun onNoteClick(id: Long) {
         val navigator = (activity as? MainActivity)?.navigator
         navigator?.navigateToNoteDetails(NoteDetailsScreenMode.Edit(id))
+    }
+
+    private fun onAddNoteClick() {
+        val navigator = (activity as? MainActivity)?.navigator
+        navigator?.navigateToNoteDetails(NoteDetailsScreenMode.Create)
     }
 
     private fun collectData() {

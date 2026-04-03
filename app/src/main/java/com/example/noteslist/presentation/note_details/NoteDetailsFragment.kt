@@ -31,11 +31,16 @@ class NoteDetailsFragment : Fragment(R.layout.fragment_note_details) {
     }
 
     private fun setupBackCallback() {
-        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                handleBack()
-            }
-        })
+        requireActivity()
+            .onBackPressedDispatcher
+            .addCallback(
+                viewLifecycleOwner,
+                object : OnBackPressedCallback(true) {
+                    override fun handleOnBackPressed() {
+                        handleBack()
+                    }
+                }
+            )
     }
 
     private fun handleBack() {
