@@ -4,6 +4,9 @@ import com.example.noteslist.data.datasources.NotesDataSource
 import com.example.noteslist.domain.models.Note
 import dagger.hilt.components.SingletonComponent
 import it.czerwinski.android.hilt.annotations.BoundTo
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import javax.inject.Inject
@@ -17,7 +20,7 @@ class InMemoryNotesDataSource @Inject constructor() : NotesDataSource {
     private val yesterday = now.minus(1, ChronoUnit.DAYS)
     private val twoDaysAgo = now.minus(2, ChronoUnit.DAYS)
 
-    private val notes = mutableListOf(
+    private val notesList = mutableListOf(
         Note(
             id = 1,
             title = "Список покупок",
@@ -116,20 +119,32 @@ class InMemoryNotesDataSource @Inject constructor() : NotesDataSource {
         )
     )
 
-    override fun getAllNotes(): List<Note> = notes.toList()
+    private val _notesFlow = MutableStateFlow<List<Note>>(notesList.toList())
+    override val notesFlow: Flow<List<Note>> = _notesFlow.asStateFlow()
+
+    override fun getAllNotes(): List<Note> = notesList.toList()
 
     override fun updateNote(note: Note) {
-        val index = notes.indexOfFirst { it.id == note.id }
+        val index = notesList.indexOfFirst { it.id == note.id }
         if (index != -1) {
-            notes[index] = note
+            notesList[index] = note
+            updateObservers()
         }
+
     }
 
     override fun addNote(note: Note) {
-        notes.add(note)
+        notesList.add(note)
+        updateObservers()
     }
 
     override fun deleteNote(id: Long) {
-        notes.removeIf { it.id == id }
+        if (notesList.removeIf { it.id == id }) {
+            updateObservers()
+        }
+    }
+
+    private fun updateObservers() {
+        _notesFlow.value = notesList.toList()
     }
 }
