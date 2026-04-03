@@ -2,7 +2,8 @@ package com.example.noteslist.presentation.notes_list
 
 import androidx.lifecycle.ViewModel
 import com.example.noteslist.domain.models.Note
-import com.example.noteslist.domain.repositories.NotesRepository
+import com.example.noteslist.domain.usecases.GetAllNotesUseCase
+import com.example.noteslist.domain.usecases.UpdateNoteUseCase
 import com.example.noteslist.presentation.notes_list.recycler_view.NoteListItem
 import com.example.noteslist.presentation.notes_list.recycler_view.mapper.NoteListMapper
 import com.example.noteslist.presentation.notes_list.recycler_view.mapper.NoteStackKey
@@ -11,7 +12,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 class NotesListViewModel(
-    private val repository: NotesRepository,
+    private val getAllNotesUseCase: GetAllNotesUseCase,
+    private val updateNoteUseCase: UpdateNoteUseCase,
     private val mapper: NoteListMapper,
     private val stateManager: NoteStackStateManager
 ) : ViewModel() {
@@ -29,7 +31,7 @@ class NotesListViewModel(
     fun onNoteClick(id: Long) {
         val note = cachedNotes.find { it.id == id } ?: return
         val updatedNote = note.copy(isRead = !note.isRead)
-        repository.updateNote(updatedNote)
+        updateNoteUseCase(updatedNote)
         updateList()
     }
 
@@ -39,7 +41,7 @@ class NotesListViewModel(
     }
 
     private fun updateList() {
-        val notes = repository.getAllNotes()
+        val notes = getAllNotesUseCase()
         cachedNotes = notes
         mapList(notes)
     }

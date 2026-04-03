@@ -11,6 +11,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.noteslist.R
 import com.example.noteslist.data.datasources.notes.local.InMemoryNotesDataSource
 import com.example.noteslist.data.repositories.NotesRepositoryImpl
+import com.example.noteslist.domain.usecases.GetAllNotesUseCase
+import com.example.noteslist.domain.usecases.UpdateNoteUseCase
 import com.example.noteslist.presentation.notes_list.NotesListViewModel
 import com.example.noteslist.presentation.notes_list.recycler_view.NoteSpaceItemDecoration
 import com.example.noteslist.presentation.notes_list.recycler_view.NotesAdapter
@@ -30,6 +32,9 @@ class MainActivity : AppCompatActivity() {
                 val repo = NotesRepositoryImpl(
                     dataSource = InMemoryNotesDataSource()
                 )
+                val getAllNotesUseCase = GetAllNotesUseCase(repo)
+                val updateNoteUseCase = UpdateNoteUseCase(repo)
+                
                 val stateManager = NoteStackStateManager()
                 val mapper = NoteListMapper(
                     dateFormatter = RelativeDateFormatter(
@@ -38,7 +43,12 @@ class MainActivity : AppCompatActivity() {
                     stateProvider = stateManager
                 )
 
-                return NotesListViewModel(repo, mapper, stateManager) as T
+                return NotesListViewModel(
+                    getAllNotesUseCase = getAllNotesUseCase,
+                    updateNoteUseCase = updateNoteUseCase,
+                    mapper = mapper,
+                    stateManager = stateManager
+                ) as T
             }
         }
     }
