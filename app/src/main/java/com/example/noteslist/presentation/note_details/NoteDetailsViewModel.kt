@@ -100,15 +100,15 @@ class NoteDetailsViewModel @Inject constructor(
         when (val mode = currentState.mode) {
             is NoteDetailsScreenMode.Create -> {
                 val newNote = Note(
-                    id = System.currentTimeMillis(),
                     title = currentState.title,
                     text = currentState.text,
-                    timestamp = Instant.now(),
                     isImportant = currentState.isImportant,
                     isRead = currentState.isRead
                 )
-                addNoteUseCase(newNote)
+                val id = addNoteUseCase(newNote)
                 initialNote = newNote
+
+                _state.value = getNoteDetailsState(id)
             }
 
             is NoteDetailsScreenMode.Edit -> {

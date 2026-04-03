@@ -22,9 +22,9 @@ class NotesRepositoryImpl @Inject constructor(
         dataSource.updateNote(note)
     }
 
-    override fun addNote(note: Note) {
+    override fun addNote(note: Note) =
         dataSource.addNote(note)
-    }
+
 
     override fun deleteNote(id: Int) {
         dataSource.deleteNote(id.toLong())

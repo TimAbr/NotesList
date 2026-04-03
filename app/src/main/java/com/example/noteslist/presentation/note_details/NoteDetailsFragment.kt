@@ -53,6 +53,8 @@ class NoteDetailsFragment : Fragment(R.layout.fragment_note_details) {
     }
 
     private fun handleBack() {
-        navigator.handleBackPress(viewModel.isDirty())
+        navigator.handleBackPress(
+            viewModel.isDirty()
+        )
     }
 }

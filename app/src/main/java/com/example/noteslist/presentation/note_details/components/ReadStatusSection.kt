@@ -53,14 +53,14 @@ fun ReadStatusSection(
         }
     }
 
-    Box(contentAlignment = Alignment.Companion.TopStart) {
+    Box(contentAlignment = Alignment.TopStart) {
         Box(
-            modifier = Modifier.Companion
+            modifier = Modifier
                 .clip(CircleShape)
                 .combinedClickable(
                     onClick = { showHint = true },
                     onLongClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.Companion.LongPress)
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                         onReadToggle(!isRead)
                         showHint = false
                     }
@@ -94,7 +94,7 @@ fun ReadStatusSection(
                         Text(
                             text = stringResource(R.string.read_toggle_hint),
                             style = MaterialTheme.typography.labelSmall,
-                            modifier = Modifier.Companion.padding(
+                            modifier = Modifier.padding(
                                 horizontal = 8.dp,
                                 vertical = 4.dp
                             ),

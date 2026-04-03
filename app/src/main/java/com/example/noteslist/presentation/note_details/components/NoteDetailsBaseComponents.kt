@@ -21,21 +21,21 @@ fun NoteTitleInput(
     isError: Boolean,
     onTitleChange: (String) -> Unit
 ) {
-    Column(modifier = Modifier.Companion.fillMaxWidth()) {
+    Column(modifier = Modifier.fillMaxWidth()) {
         OutlinedTextField(
             value = title,
             onValueChange = onTitleChange,
             label = { Text(stringResource(R.string.note_details_title_hint)) },
             singleLine = true,
             isError = isError,
-            modifier = Modifier.Companion.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth()
         )
         if (isError) {
             Text(
                 text = stringResource(R.string.note_details_error_empty),
                 color = MaterialTheme.colorScheme.error,
                 style = MaterialTheme.typography.labelSmall,
-                modifier = Modifier.Companion.padding(start = 8.dp, top = 4.dp)
+                modifier = Modifier.padding(start = 8.dp, top = 4.dp)
             )
         }
     }
@@ -51,7 +51,7 @@ fun NoteTextInput(
         value = text,
         onValueChange = onTextChange,
         label = { Text(stringResource(R.string.note_details_text_hint)) },
-        modifier = Modifier.Companion
+        modifier = Modifier
             .fillMaxWidth()
             .heightIn(min = 120.dp)
     )
@@ -83,10 +83,11 @@ fun SaveButton(
     Button(
         onClick = {
             if (onSave()) {
+
                 onBack()
             }
         },
-        modifier = Modifier.Companion.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth()
     ) {
         Text(text = buttonText)
     }

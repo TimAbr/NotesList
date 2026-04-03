@@ -122,6 +122,8 @@ class InMemoryNotesDataSource @Inject constructor() : NotesDataSource {
     private val _notesFlow = MutableStateFlow<List<Note>>(notesList.toList())
     override val notesFlow: Flow<List<Note>> = _notesFlow.asStateFlow()
 
+    private var lastId = notesList.maxOfOrNull { it.id } ?: 0L
+
     override fun getAllNotes(): List<Note> = notesList.toList()
 
     override fun updateNote(note: Note) {
@@ -133,9 +135,14 @@ class InMemoryNotesDataSource @Inject constructor() : NotesDataSource {
 
     }
 
-    override fun addNote(note: Note) {
+    override fun addNote(note: Note): Long {
+        val newId = ++lastId
+        val noteWithId = note.copy(id = newId)
+
         notesList.add(note)
         updateObservers()
+
+        return newId
     }
 
     override fun deleteNote(id: Long) {

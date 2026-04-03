@@ -52,14 +52,14 @@ fun ImportantToggle(
     )
 
     Row(
-        modifier = Modifier.Companion
+        modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp),
-        verticalAlignment = Alignment.Companion.CenterVertically
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             text = stringResource(R.string.note_details_important_label),
-            modifier = Modifier.Companion.weight(1f),
+            modifier = Modifier.weight(1f),
             style = MaterialTheme.typography.bodyLarge
         )
 
@@ -70,7 +70,7 @@ fun ImportantToggle(
                 imageVector = if (isImportant) Icons.Filled.Star else Icons.Outlined.Star,
                 contentDescription = null,
                 tint = tint,
-                modifier = Modifier.Companion.scale(scale)
+                modifier = Modifier.scale(scale)
             )
         }
     }

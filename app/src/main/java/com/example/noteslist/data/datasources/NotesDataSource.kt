@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.Flow
 interface NotesDataSource {
     fun getAllNotes(): List<Note>
     fun updateNote(note: Note)
-    fun addNote(note: Note)
+    fun addNote(note: Note): Long
     fun deleteNote(id: Long)
     val notesFlow: Flow<List<Note>>
 }
