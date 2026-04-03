@@ -1,7 +1,7 @@
 package com.example.noteslist.presentation.notes_list.recycler_view.mapper
 
 import com.example.noteslist.domain.models.Note
-import com.example.noteslist.presentation.common.NoteDateFormatter
+import com.example.noteslist.presentation.common.date_formatter.NoteDateFormatter
 import com.example.noteslist.presentation.di.RelativeDate
 import com.example.noteslist.presentation.notes_list.recycler_view.NoteListItem
 import java.time.ZoneId

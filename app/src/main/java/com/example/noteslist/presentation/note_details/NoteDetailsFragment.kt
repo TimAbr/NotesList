@@ -7,11 +7,18 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.example.noteslist.R
-import com.example.noteslist.presentation.MainActivity
+import com.example.noteslist.presentation.common.navigation.AppNavigator
+import com.example.noteslist.presentation.common.theme.NotesListTheme
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class NoteDetailsFragment : Fragment(R.layout.fragment_note_details) {
 
     private val viewModel: NoteDetailsViewModel by viewModels()
+
+    @Inject
+    lateinit var navigator: AppNavigator
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -20,12 +27,14 @@ class NoteDetailsFragment : Fragment(R.layout.fragment_note_details) {
 
         view.findViewById<ComposeView>(R.id.composeView).apply {
             setContent {
-                NoteDetailsScreen(
-                    viewModel = viewModel,
-                    onBack = {
-                        handleBack()
-                    }
-                )
+                NotesListTheme {
+                    NoteDetailsScreen(
+                        viewModel = viewModel,
+                        onBack = {
+                            handleBack()
+                        }
+                    )
+                }
             }
         }
     }
@@ -44,7 +53,6 @@ class NoteDetailsFragment : Fragment(R.layout.fragment_note_details) {
     }
 
     private fun handleBack() {
-        val navigator = (activity as? MainActivity)?.navigator
-        navigator?.handleBackPress(viewModel.isDirty())
+        navigator.handleBackPress(viewModel.isDirty())
     }
 }

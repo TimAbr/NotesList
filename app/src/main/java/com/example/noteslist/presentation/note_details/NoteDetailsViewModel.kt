@@ -7,13 +7,16 @@ import com.example.noteslist.domain.usecases.AddNoteUseCase
 import com.example.noteslist.domain.usecases.GetNoteByIdUseCase
 import com.example.noteslist.domain.usecases.UpdateNoteUseCase
 import com.example.noteslist.presentation.common.date_formatter.NoteDateFormatter
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import java.time.Instant
+import javax.inject.Inject
 
-class NoteDetailsViewModel(
+@HiltViewModel
+class NoteDetailsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val getNoteByIdUseCase: GetNoteByIdUseCase,
     private val addNoteUseCase: AddNoteUseCase,

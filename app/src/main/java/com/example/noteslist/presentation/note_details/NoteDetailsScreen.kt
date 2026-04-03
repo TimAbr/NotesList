@@ -54,7 +54,7 @@ fun NoteDetailsScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    NoteDetailsContent(
+    NoteDetailsBase(
         state = state,
         onTitleChange = viewModel::onTitleChange,
         onTextChange = viewModel::onTextChange,

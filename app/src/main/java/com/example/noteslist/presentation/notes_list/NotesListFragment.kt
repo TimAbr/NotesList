@@ -5,53 +5,32 @@ import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.noteslist.R
-import com.example.noteslist.data.datasources.notes.local.InMemoryNotesDataSource
-import com.example.noteslist.data.repositories.NotesRepositoryImpl
-import com.example.noteslist.presentation.MainActivity
-import com.example.noteslist.presentation.common.date_formatter.RelativeDateFormatter
+import com.example.noteslist.presentation.common.navigation.AppNavigator
 import com.example.noteslist.presentation.note_details.NoteDetailsScreenMode
 import com.example.noteslist.presentation.notes_list.recycler_view.NoteSpaceItemDecoration
 import com.example.noteslist.presentation.notes_list.recycler_view.NotesAdapter
 import com.example.noteslist.presentation.notes_list.recycler_view.delegates.DateHeaderDelegate
 import com.example.noteslist.presentation.notes_list.recycler_view.delegates.NoteDelegate
 import com.example.noteslist.presentation.notes_list.recycler_view.delegates.NoteStackDelegate
-import com.example.noteslist.presentation.notes_list.recycler_view.mapper.NoteListMapper
-import com.example.noteslist.presentation.notes_list.recycler_view.mapper.NoteStackStateManager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
-import kotlin.getValue
+import javax.inject.Inject
 
-
+@AndroidEntryPoint
 class NotesListFragment : Fragment(R.layout.fragment_notes_list) {
 
-    private val viewModel: NotesListViewModel by viewModels {
-        object : ViewModelProvider.Factory {
-            override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                val repo = NotesRepositoryImpl(
-                    dataSource = InMemoryNotesDataSource()
-                )
-                val stateManager = NoteStackStateManager()
-                val mapper = NoteListMapper(
-                    dateFormatter = RelativeDateFormatter(
-                        requireContext().applicationContext
-                    ),
-                    stateProvider = stateManager
-                )
+    private val viewModel: NotesListViewModel by viewModels()
 
-                return NotesListViewModel(repo, mapper, stateManager) as T
-            }
-        }
-    }
+    @Inject
+    lateinit var navigator: AppNavigator
 
     private var adapter: NotesAdapter? = null
-
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -80,13 +59,13 @@ class NotesListFragment : Fragment(R.layout.fragment_notes_list) {
         recyclerView.addItemDecoration(NoteSpaceItemDecoration(spacing))
         recyclerView.adapter = adapter
 
-        val fab = view.findViewById<FloatingActionButton>(R.id.btnAddNote)
+        val btnAddNote = view.findViewById<FloatingActionButton>(R.id.btnAddNote)
         recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                if (dy > 0 && fab.isShown) {
-                    fab.hide()
-                } else if (dy < 0 && !fab.isShown) {
-                    fab.show()
+                if (dy > 0 && btnAddNote.isShown) {
+                    btnAddNote.hide()
+                } else if (dy < 0 && !btnAddNote.isShown) {
+                    btnAddNote.show()
                 }
             }
         })
@@ -99,13 +78,11 @@ class NotesListFragment : Fragment(R.layout.fragment_notes_list) {
     }
 
     private fun onNoteClick(id: Long) {
-        val navigator = (activity as? MainActivity)?.navigator
-        navigator?.navigateToNoteDetails(NoteDetailsScreenMode.Edit(id))
+        navigator.navigateToNoteDetails(NoteDetailsScreenMode.Edit(id))
     }
 
     private fun onAddNoteClick() {
-        val navigator = (activity as? MainActivity)?.navigator
-        navigator?.navigateToNoteDetails(NoteDetailsScreenMode.Create)
+        navigator.navigateToNoteDetails(NoteDetailsScreenMode.Create)
     }
 
     private fun collectData() {

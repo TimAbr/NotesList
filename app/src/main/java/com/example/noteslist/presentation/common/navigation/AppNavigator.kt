@@ -13,9 +13,13 @@ import com.example.noteslist.NavGraphDirections
 import com.example.noteslist.R
 import com.example.noteslist.presentation.MainActivity
 import com.example.noteslist.presentation.note_details.NoteDetailsScreenMode
+import dagger.hilt.android.qualifiers.ActivityContext
+import dagger.hilt.android.scopes.ActivityScoped
+import javax.inject.Inject
 
-class AppNavigator (
-    private val context: Context
+@ActivityScoped
+class AppNavigator @Inject constructor(
+    @ActivityContext private val context: Context
 ) {
     private val activity = context as MainActivity
     private val navController: NavController by lazy {
