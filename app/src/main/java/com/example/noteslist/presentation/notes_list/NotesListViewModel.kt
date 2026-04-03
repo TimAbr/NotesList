@@ -1,5 +1,6 @@
 package com.example.noteslist.presentation.notes_list
 
+import android.os.Parcelable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.noteslist.domain.models.Note
@@ -31,6 +32,8 @@ class NotesListViewModel @Inject constructor(
     init {
         observeNotes()
     }
+
+    var scrollState: Parcelable? = null
 
     private fun observeNotes() {
         viewModelScope.launch {

@@ -3,7 +3,7 @@ package com.example.noteslist.presentation.notes_list
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -25,12 +25,17 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class NotesListFragment : Fragment(R.layout.fragment_notes_list) {
 
-    private val viewModel: NotesListViewModel by viewModels()
+    private val viewModel: NotesListViewModel by activityViewModels()
 
     @Inject
     lateinit var navigator: AppNavigator
 
     private var adapter: NotesAdapter? = null
+
+    private var _recyclerView: RecyclerView? = null
+    private val recyclerView: RecyclerView
+        get() = _recyclerView!!
+
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -41,7 +46,9 @@ class NotesListFragment : Fragment(R.layout.fragment_notes_list) {
     }
 
     private fun setupRecyclerView(view: View) {
-        val recyclerView = view.findViewById<RecyclerView>(R.id.recyclerView)
+        _recyclerView = view.findViewById(R.id.recyclerView)
+
+        val layoutManager = LinearLayoutManager(requireContext())
 
         adapter = NotesAdapter(
             listOf(
@@ -52,9 +59,12 @@ class NotesListFragment : Fragment(R.layout.fragment_notes_list) {
                     onStackClick = { viewModel.onStackClick(it) }
                 )
             )
-        )
+        ).apply {
+            stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
+        }
 
-        recyclerView.layoutManager = LinearLayoutManager(requireContext())
+        recyclerView.layoutManager = layoutManager
+
         val spacing = resources.getDimensionPixelSize(R.dimen.note_list_spacing)
         recyclerView.addItemDecoration(NoteSpaceItemDecoration(spacing))
         recyclerView.adapter = adapter
@@ -88,16 +98,30 @@ class NotesListFragment : Fragment(R.layout.fragment_notes_list) {
     private fun collectData() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.items.collect {
-                    adapter?.submitList(it)
+                viewModel.items.collect {items ->
+                    adapter?.submitList(items){
+                        val state = viewModel.scrollState
+                        if (state != null && items.isNotEmpty()) {
+
+                            recyclerView.post {
+                                recyclerView.layoutManager?.onRestoreInstanceState(state)
+                                viewModel.scrollState = null
+                            }
+                        }
+                    }
                 }
             }
         }
     }
 
     override fun onDestroyView() {
+
+        viewModel.scrollState = recyclerView.layoutManager?.onSaveInstanceState()
+
         super.onDestroyView()
+
         adapter = null
+        _recyclerView = null
     }
 
 }
