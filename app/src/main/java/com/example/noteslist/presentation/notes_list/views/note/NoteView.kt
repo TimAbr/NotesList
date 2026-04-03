@@ -8,14 +8,19 @@ import android.view.View
 import android.view.ViewOutlineProvider
 import com.example.noteslist.domain.models.Note
 import com.example.noteslist.presentation.common.NoteDateFormatter
-import com.example.noteslist.presentation.common.NoteDateFormatterImpl
 import com.example.noteslist.presentation.notes_list.views.ViewPaddings
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class NoteView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
+
+    @Inject
+    lateinit var dateFormatter: NoteDateFormatter
 
     private var config: NoteViewConfig
     private val paddings = ViewPaddings(
@@ -28,11 +33,8 @@ class NoteView @JvmOverloads constructor(
     private val renderer = NoteViewRenderer(context)
     private val measurer = NoteViewMeasurer(renderer)
 
-
     private var formattedDate: String = ""
 
-    private val dateFormatter: NoteDateFormatter =
-        NoteDateFormatterImpl()
     private val attributeParser =
         NoteViewAttributeParser(dateFormatter)
 
@@ -41,8 +43,7 @@ class NoteView @JvmOverloads constructor(
         get() = _data
         set(value) {
             _data = value
-            formattedDate = dateFormatter
-                .format(value.timestamp)
+            formattedDate = dateFormatter.format(value.timestamp)
             requestLayout()
             invalidate()
         }
@@ -85,7 +86,6 @@ class NoteView @JvmOverloads constructor(
             resolveSize(result.measuredHeight, heightMeasureSpec)
         )
     }
-
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)

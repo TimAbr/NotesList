@@ -2,10 +2,16 @@ package com.example.noteslist.data.datasources.notes.local
 
 import com.example.noteslist.data.datasources.NotesDataSource
 import com.example.noteslist.domain.models.Note
+import dagger.hilt.components.SingletonComponent
+import it.czerwinski.android.hilt.annotations.BoundTo
 import java.time.Instant
 import java.time.temporal.ChronoUnit
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class InMemoryNotesDataSource : NotesDataSource {
+@BoundTo(supertype = NotesDataSource::class, component = SingletonComponent::class)
+@Singleton
+class InMemoryNotesDataSource @Inject constructor() : NotesDataSource {
 
     private val now = Instant.now()
     private val yesterday = now.minus(1, ChronoUnit.DAYS)

@@ -3,8 +3,12 @@ package com.example.noteslist.data.repositories
 import com.example.noteslist.data.datasources.NotesDataSource
 import com.example.noteslist.domain.models.Note
 import com.example.noteslist.domain.repositories.NotesRepository
+import dagger.hilt.components.SingletonComponent
+import it.czerwinski.android.hilt.annotations.BoundTo
+import javax.inject.Inject
 
-class NotesRepositoryImpl(
+@BoundTo(supertype = NotesRepository::class, component = SingletonComponent::class)
+class NotesRepositoryImpl @Inject constructor(
     private val dataSource: NotesDataSource
 ) : NotesRepository {
 

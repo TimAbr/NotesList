@@ -2,11 +2,13 @@ package com.example.noteslist.presentation.notes_list.recycler_view.mapper
 
 import com.example.noteslist.domain.models.Note
 import com.example.noteslist.presentation.common.NoteDateFormatter
+import com.example.noteslist.presentation.di.RelativeDate
 import com.example.noteslist.presentation.notes_list.recycler_view.NoteListItem
 import java.time.ZoneId
+import javax.inject.Inject
 
-class NoteListMapper(
-    private val dateFormatter: NoteDateFormatter,
+class NoteListMapper @Inject constructor(
+    @RelativeDate private val dateFormatter: NoteDateFormatter,
     private val stateProvider: NoteStackStateProvider
 ) {
     fun mapToAdapterItems(

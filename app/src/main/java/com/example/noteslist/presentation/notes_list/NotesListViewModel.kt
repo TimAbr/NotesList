@@ -8,10 +8,13 @@ import com.example.noteslist.presentation.notes_list.recycler_view.NoteListItem
 import com.example.noteslist.presentation.notes_list.recycler_view.mapper.NoteListMapper
 import com.example.noteslist.presentation.notes_list.recycler_view.mapper.NoteStackKey
 import com.example.noteslist.presentation.notes_list.recycler_view.mapper.NoteStackStateManager
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import javax.inject.Inject
 
-class NotesListViewModel(
+@HiltViewModel
+class NotesListViewModel @Inject constructor(
     private val getAllNotesUseCase: GetAllNotesUseCase,
     private val updateNoteUseCase: UpdateNoteUseCase,
     private val mapper: NoteListMapper,
@@ -22,7 +25,6 @@ class NotesListViewModel(
     val items = _items.asStateFlow()
 
     private var cachedNotes: List<Note> = emptyList()
-
 
     init {
         updateList()
@@ -46,7 +48,7 @@ class NotesListViewModel(
         mapList(notes)
     }
 
-    private fun mapList(list: List<Note>){
+    private fun mapList(list: List<Note>) {
         _items.value = mapper.mapToAdapterItems(list)
     }
 }
