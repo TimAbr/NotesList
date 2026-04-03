@@ -6,7 +6,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.Guideline
 import androidx.navigation.NavController
-import androidx.navigation.findNavController
+import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.navOptions
 import androidx.transition.TransitionManager
 import com.example.noteslist.NavGraphDirections
@@ -19,7 +19,9 @@ class AppNavigator (
 ) {
     private val activity = context as MainActivity
     private val navController: NavController by lazy {
-        activity.findNavController(R.id.nav_host_fragment)
+        val navHostFragment = activity.supportFragmentManager
+            .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+        navHostFragment.navController
     }
 
     private val isMultiPane: Boolean
@@ -28,14 +30,14 @@ class AppNavigator (
     fun setup() {
         activity.window.decorView.post {
             syncRotationState()
-        }
+            
+            if (isMultiPane && isDestination(R.id.notesListFragment)) {
+                navigateToRoot()
+            }
 
-        if (isMultiPane && isDestination(R.id.notesListFragment)) {
-            navigateToRoot()
-        }
-
-        if (!isMultiPane && isDestination(R.id.emptyFragment)) {
-            navigateToRoot()
+            if (!isMultiPane && isDestination(R.id.emptyFragment)) {
+                navigateToRoot()
+            }
         }
     }
 
