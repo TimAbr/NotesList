@@ -7,7 +7,7 @@ import android.util.AttributeSet
 import androidx.core.content.res.use
 import com.example.noteslist.R
 import com.example.noteslist.domain.models.Note
-import com.example.noteslist.presentation.common.NoteDateFormatter
+import com.example.noteslist.presentation.common.date_formatter.NoteDateFormatter
 import java.time.Instant
 
 class NoteViewAttributeParser(private val noteDateFormatter: NoteDateFormatter) {

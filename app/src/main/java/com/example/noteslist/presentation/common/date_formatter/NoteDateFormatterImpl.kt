@@ -1,4 +1,4 @@
-package com.example.noteslist.presentation.common
+package com.example.noteslist.presentation.common.date_formatter
 
 import com.example.noteslist.presentation.di.DateTimePattern
 import dagger.hilt.components.SingletonComponent

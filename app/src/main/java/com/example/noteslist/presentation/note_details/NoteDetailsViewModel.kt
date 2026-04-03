@@ -6,7 +6,7 @@ import com.example.noteslist.domain.models.Note
 import com.example.noteslist.domain.usecases.AddNoteUseCase
 import com.example.noteslist.domain.usecases.GetNoteByIdUseCase
 import com.example.noteslist.domain.usecases.UpdateNoteUseCase
-import com.example.noteslist.presentation.common.NoteDateFormatter
+import com.example.noteslist.presentation.common.date_formatter.NoteDateFormatter
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -21,25 +21,25 @@ class NoteDetailsViewModel(
     private val dateFormatter: NoteDateFormatter
 ) : ViewModel() {
 
-
     private val mode: NoteDetailsScreenMode = NoteDetailsFragmentArgs
         .fromSavedStateHandle(savedStateHandle)
         .mode
 
+    private var initialNote: Note? = null
+
     private val _state = MutableStateFlow(
         when (mode) {
             is NoteDetailsScreenMode.Edit -> {
-                getNoteDetailsState(mode.noteId)
+                val state = getNoteDetailsState(mode.noteId)
+                initialNote = getNoteByIdUseCase(mode.noteId)
+                state
             }
             is NoteDetailsScreenMode.Create -> {
-                NoteDetailsScreenState(
-                    mode = mode
-                )
+                NoteDetailsScreenState(mode = mode)
             }
         }
     )
     val state: StateFlow<NoteDetailsScreenState> = _state.asStateFlow()
-
 
     private fun getNoteDetailsState(noteId: Long): NoteDetailsScreenState {
         val note = getNoteByIdUseCase(noteId)
@@ -55,6 +55,20 @@ class NoteDetailsViewModel(
             )
         }
         return NoteDetailsScreenState()
+    }
+
+    fun isDirty(): Boolean {
+        val currentState = _state.value
+        return if (mode is NoteDetailsScreenMode.Edit) {
+            initialNote?.let { initial ->
+                currentState.title != initial.title ||
+                currentState.text != initial.text ||
+                currentState.isImportant != initial.isImportant ||
+                currentState.isRead != initial.isRead
+            } ?: false
+        } else {
+            currentState.title.isNotBlank() || currentState.text.isNotBlank()
+        }
     }
 
     fun onTitleChange(newTitle: String) {
@@ -91,6 +105,7 @@ class NoteDetailsViewModel(
                     isRead = currentState.isRead
                 )
                 addNoteUseCase(newNote)
+                initialNote = newNote
             }
 
             is NoteDetailsScreenMode.Edit -> {
@@ -103,6 +118,7 @@ class NoteDetailsViewModel(
                     isRead = currentState.isRead
                 )
                 updateNoteUseCase(updatedNote)
+                initialNote = updatedNote
             }
         }
 

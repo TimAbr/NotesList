@@ -4,14 +4,15 @@
     android:id="@+id/nav_graph"
     app:startDestination="@id/notesListFragment">
 
+    <action
+        android:id="@+id/action_global_noteDetailsFragment"
+        app:destination="@id/noteDetailsFragment" />
+
     <fragment
         android:id="@+id/notesListFragment"
         android:name="com.example.noteslist.presentation.notes_list.NotesListFragment"
-        android:label="NotesListFragment" >
-        <action
-            android:id="@+id/action_notesListFragment_to_noteDetailsFragment"
-            app:destination="@id/noteDetailsFragment" />
-    </fragment>
+        android:label="NotesListFragment" />
+
     <fragment
         android:id="@+id/noteDetailsFragment"
         android:name="com.example.noteslist.presentation.note_details.NoteDetailsFragment"
@@ -20,4 +21,10 @@
             android:name="mode"
             app:argType="com.example.noteslist.presentation.note_details.NoteDetailsScreenMode" />
     </fragment>
+
+    <fragment
+        android:id="@+id/emptyFragment"
+        android:name="com.example.noteslist.presentation.note_details.NoteDetailsPlaceholderFragment"
+        android:label="EmptyFragment" />
+
 </navigation>

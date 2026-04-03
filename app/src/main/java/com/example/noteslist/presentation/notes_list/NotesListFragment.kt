@@ -14,7 +14,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.noteslist.R
 import com.example.noteslist.data.datasources.notes.local.InMemoryNotesDataSource
 import com.example.noteslist.data.repositories.NotesRepositoryImpl
-import com.example.noteslist.presentation.common.RelativeDateFormatter
+import com.example.noteslist.presentation.MainActivity
+import com.example.noteslist.presentation.common.date_formatter.RelativeDateFormatter
+import com.example.noteslist.presentation.note_details.NoteDetailsScreenMode
 import com.example.noteslist.presentation.notes_list.recycler_view.NoteSpaceItemDecoration
 import com.example.noteslist.presentation.notes_list.recycler_view.NotesAdapter
 import com.example.noteslist.presentation.notes_list.recycler_view.delegates.DateHeaderDelegate
@@ -63,9 +65,9 @@ class NotesListFragment : Fragment(R.layout.fragment_notes_list) {
         adapter = NotesAdapter(
             listOf(
                 DateHeaderDelegate(),
-                NoteDelegate { viewModel.onNoteClick(it) },
+                NoteDelegate { onNoteClick(it) },
                 NoteStackDelegate(
-                    onNoteClick = { viewModel.onNoteClick(it) },
+                    onNoteClick = { onNoteClick(it) },
                     onStackClick = { viewModel.onStackClick(it) }
                 )
             )
@@ -75,6 +77,11 @@ class NotesListFragment : Fragment(R.layout.fragment_notes_list) {
         val spacing = resources.getDimensionPixelSize(R.dimen.note_list_spacing)
         recyclerView.addItemDecoration(NoteSpaceItemDecoration(spacing))
         recyclerView.adapter = adapter
+    }
+
+    private fun onNoteClick(id: Long) {
+        val navigator = (activity as? MainActivity)?.navigator
+        navigator?.navigateToNoteDetails(NoteDetailsScreenMode.Edit(id))
     }
 
     private fun collectData() {
