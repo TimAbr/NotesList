@@ -8,6 +8,7 @@ import androidx.navigation.navOptions
 import com.example.noteslist.NavGraphDirections
 import com.example.noteslist.R
 import com.example.noteslist.presentation.MainActivity
+import com.example.noteslist.presentation.note_details.NoteDetailsFragment
 import com.example.noteslist.presentation.note_details.NoteDetailsScreenMode
 import dagger.hilt.android.qualifiers.ActivityContext
 import dagger.hilt.android.scopes.ActivityScoped
@@ -28,6 +29,14 @@ class AppNavigator @Inject constructor(
     private val isMultiPane: Boolean
         get() = activity.resources.getBoolean(R.bool.is_multi_pane)
 
+    private fun isDetailsDirty(): Boolean {
+        val navHostFragment = activity.supportFragmentManager
+            .findFragmentById(R.id.nav_host_fragment) as? NavHostFragment
+        val detailsFragment = navHostFragment?.childFragmentManager?.fragments
+            ?.firstOrNull { it is NoteDetailsFragment } as? NoteDetailsFragment
+        return detailsFragment?.isDirty() ?: false
+    }
+
     fun setup() {
         activity.window.decorView.post {
             syncRotationState()
@@ -43,6 +52,16 @@ class AppNavigator @Inject constructor(
     }
 
     fun navigateToNoteDetails(mode: NoteDetailsScreenMode) {
+        if (isMultiPane && isDetailsOpen() && isDetailsDirty()) {
+            showDataLossDialog {
+                performNavigateToNoteDetails(mode)
+            }
+        } else {
+            performNavigateToNoteDetails(mode)
+        }
+    }
+
+    private fun performNavigateToNoteDetails(mode: NoteDetailsScreenMode) {
         displayController.showDetails()
 
         val action = NavGraphDirections.actionGlobalNoteDetailsFragment(mode)
@@ -74,7 +93,7 @@ class AppNavigator @Inject constructor(
 
     private fun handleDetailsBack(isDataChanged: Boolean) {
         if (isDataChanged) {
-            showDataLossDialog()
+            showDataLossDialog { closeDetails() }
         } else {
             closeDetails()
         }
@@ -100,11 +119,11 @@ class AppNavigator @Inject constructor(
 
     private fun isDestination(id: Int): Boolean = navController.currentDestination?.id == id
 
-    private fun showDataLossDialog() {
+    private fun showDataLossDialog(onConfirm: () -> Unit) {
         AlertDialog.Builder(activity)
             .setTitle(R.string.lose_data_dialog_title)
             .setMessage(R.string.lose_data_dialog_message)
-            .setPositiveButton(R.string.dialog_yes) { _, _ -> closeDetails() }
+            .setPositiveButton(R.string.dialog_yes) { _, _ -> onConfirm() }
             .setNegativeButton(R.string.dialog_no, null)
             .show()
     }

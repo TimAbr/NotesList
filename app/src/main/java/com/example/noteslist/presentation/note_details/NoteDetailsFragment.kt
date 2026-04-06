@@ -39,6 +39,8 @@ class NoteDetailsFragment : Fragment(R.layout.fragment_note_details) {
         }
     }
 
+    fun isDirty(): Boolean = viewModel.isDirty()
+
     private fun setupBackCallback() {
         requireActivity()
             .onBackPressedDispatcher
