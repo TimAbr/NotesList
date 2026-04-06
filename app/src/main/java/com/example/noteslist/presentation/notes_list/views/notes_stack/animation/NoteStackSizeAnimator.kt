@@ -10,7 +10,7 @@ import android.view.animation.Interpolator
 class NoteStackSizeAnimator(private val view: View, private val interpolator: Interpolator) {
     private var boundsAnimator: ValueAnimator? = null
 
-    fun animate(targetHeight: Int, startDelayMs: Long, durationMs: Long) {
+    fun animate(targetHeight: Int, startDelayMs: Long, durationMs: Long, onUpdate: ((Int) -> Unit)? = null) {
         boundsAnimator?.cancel()
         val startHeight = view.height
         
@@ -31,6 +31,7 @@ class NoteStackSizeAnimator(private val view: View, private val interpolator: In
                     currentLp.height = h
                     view.layoutParams = currentLp
                 }
+                onUpdate?.invoke(h)
             }
             addListener(object : AnimatorListenerAdapter() {
                 override fun onAnimationEnd(animation: Animator) {

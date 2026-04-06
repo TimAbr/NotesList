@@ -75,15 +75,19 @@ class NoteStackItemAnimator(
         }
     }
 
-    fun animateCollapseButtonFadeOut(button: View) {
+    fun animateCollapseButtonFadeOut(button: View, z: Float, duration: Long) {
+        button.translationZ = z
         button.animate()
             .alpha(0f)
             .scaleX(0.7f)
             .scaleY(0.7f)
-            .setDuration(200L)
+            .setDuration(duration)
+            .setStartDelay(0L)
             .setInterpolator(interpolator)
             .withEndAction {
                 button.visibility = View.GONE
+                button.translationY = 0f
+                button.translationZ = 0f
             }
             .start()
     }
@@ -152,6 +156,7 @@ class NoteStackItemAnimator(
         button.alpha = 0f
         button.scaleX = 0.7f
         button.scaleY = 0.7f
+        button.translationY = 0f
         button.visibility = View.VISIBLE
         button.animate()
             .alpha(1f)

@@ -53,7 +53,6 @@ class NoteStackAnimator(
         if (noteViews.isEmpty()) return
 
         val timing = NoteStackAnimationTiming(noteViews.size)
-        itemAnimator.animateCollapseButtonFadeOut(collapseButton)
         performCollapse(noteViews, emptyView, collapseButton, timing)
     }
 
@@ -65,12 +64,24 @@ class NoteStackAnimator(
     ) {
         val expandedTops = noteViews.map { it.top }
 
-        animateContainerSize(
-            noteViews = noteViews,
-            emptyView = emptyView,
-            collapseButton = collapseButton,
-            isExpanded = false,
-            timing = timing
+        val targetHeight = measureTargetHeight(noteViews, emptyView, collapseButton, false)
+
+        val initialButtonTop = collapseButton.top
+        val buttonHeight = collapseButton.measuredHeight
+
+        sizeAnimator.animate(
+            targetHeight = targetHeight,
+            startDelayMs = 0L,
+            durationMs = timing.totalStackDuration,
+            onUpdate = { h ->
+                collapseButton.translationY = (h - (initialButtonTop + buttonHeight)).toFloat()
+            }
+        )
+
+        itemAnimator.animateCollapseButtonFadeOut(
+            button = collapseButton,
+            z = noteViews.size + 1f,
+            duration = NoteStackAnimationTiming.BUTTON_ANIMATION_DURATION_MS
         )
 
         itemAnimator.animateCollapse(
@@ -92,6 +103,7 @@ class NoteStackAnimator(
             })
     }
 
+
     private fun animateContainerSize(
         noteViews: List<NoteView>,
         emptyView: View,
@@ -99,7 +111,17 @@ class NoteStackAnimator(
         isExpanded: Boolean,
         timing: NoteStackAnimationTiming
     ) {
-        val targetMeasure = measurer.measure(
+        val targetHeight = measureTargetHeight(noteViews, emptyView, collapseButton, isExpanded)
+        sizeAnimator.animate(targetHeight, 0L, timing.totalStackDuration)
+    }
+
+    private fun measureTargetHeight(
+        noteViews: List<NoteView>,
+        emptyView: View,
+        collapseButton: View,
+        isExpanded: Boolean
+    ): Int {
+        return measurer.measure(
             notes = noteViews,
             emptyView = emptyView,
             collapseButton = collapseButton,
@@ -110,8 +132,7 @@ class NoteStackAnimator(
             ),
             heightMeasureSpec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
             paddings = paddings
-        )
-        sizeAnimator.animate(targetMeasure.height, 0L, timing.totalStackDuration)
+        ).height
     }
 
     companion object {
