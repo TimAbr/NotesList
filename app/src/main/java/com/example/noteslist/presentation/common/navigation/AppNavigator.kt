@@ -1,14 +1,10 @@
 package com.example.noteslist.presentation.common.navigation
 
 import android.content.Context
-import android.view.ViewGroup
 import androidx.appcompat.app.AlertDialog
-import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.constraintlayout.widget.Guideline
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.navOptions
-import androidx.transition.TransitionManager
 import com.example.noteslist.NavGraphDirections
 import com.example.noteslist.R
 import com.example.noteslist.presentation.MainActivity
@@ -19,7 +15,8 @@ import javax.inject.Inject
 
 @ActivityScoped
 class AppNavigator @Inject constructor(
-    @ActivityContext private val context: Context
+    @ActivityContext private val context: Context,
+    private val displayController: NavigationDisplayController
 ) {
     private val activity = context as MainActivity
     private val navController: NavController by lazy {
@@ -46,9 +43,7 @@ class AppNavigator @Inject constructor(
     }
 
     fun navigateToNoteDetails(mode: NoteDetailsScreenMode) {
-        if (isMultiPane) {
-            animateGuideline(0.5f)
-        }
+        displayController.showDetails()
 
         val action = NavGraphDirections.actionGlobalNoteDetailsFragment(mode)
         navController.navigate(
@@ -69,15 +64,12 @@ class AppNavigator @Inject constructor(
     }
 
     fun closeDetails() {
-        if (isMultiPane) {
-            animateGuideline(1.0f)
-        }
+        displayController.hideDetails()
         navigateToRoot()
     }
 
     fun syncRotationState() {
-        if (!isMultiPane) return
-        setGuidelinePercent(if (isDetailsOpen()) 0.5f else 1.0f)
+        displayController.syncState(isDetailsOpen())
     }
 
     private fun handleDetailsBack(isDataChanged: Boolean) {
@@ -107,19 +99,6 @@ class AppNavigator @Inject constructor(
     }
 
     private fun isDestination(id: Int): Boolean = navController.currentDestination?.id == id
-
-    private fun animateGuideline(percent: Float) {
-        val root = activity.findViewById<ViewGroup>(R.id.main_root) ?: return
-        TransitionManager.beginDelayedTransition(root)
-        setGuidelinePercent(percent)
-    }
-
-    private fun setGuidelinePercent(percent: Float) {
-        val guideline = activity.findViewById<Guideline>(R.id.guideline) ?: return
-        val params = guideline.layoutParams as ConstraintLayout.LayoutParams
-        params.guidePercent = percent
-        guideline.layoutParams = params
-    }
 
     private fun showDataLossDialog() {
         AlertDialog.Builder(activity)

@@ -22,7 +22,11 @@ class NoteStackAnimator(
     private val sizeAnimator = NoteStackSizeAnimator(view, interpolator)
     private val itemAnimator = NoteStackItemAnimator(interpolator, layoutManager)
 
-    fun expand(noteViews: List<NoteView>, emptyView: View, collapseButton: View) {
+    fun expand(
+        noteViews: List<NoteView>, 
+        emptyView: View, 
+        collapseButton: View
+    ) {
         if (noteViews.isEmpty()) return
 
         val timing = NoteStackAnimationTiming(noteViews.size)
