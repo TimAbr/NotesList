@@ -14,6 +14,7 @@ import com.example.noteslist.R
 import com.example.noteslist.domain.models.Note
 import com.example.noteslist.presentation.notes_list.views.ViewPaddings
 import com.example.noteslist.presentation.notes_list.views.note.NoteView
+import com.example.noteslist.presentation.notes_list.views.notes_stack.animation.NoteStackAnimator
 
 class NoteStackView @JvmOverloads constructor(
     context: Context,
@@ -32,10 +33,11 @@ class NoteStackView @JvmOverloads constructor(
     private val paddings = ViewPaddings(
         paddingLeft = paddingLeft,
         paddingTop = paddingTop,
-        paddingRight = paddingRight,
-        paddingBottom = paddingBottom
+        paddingBottom = paddingBottom,
+        paddingRight = paddingRight
     )
 
+    private val animator: NoteStackAnimator
     private var _isExpanded = false
     var isExpanded
         get() = _isExpanded
@@ -82,6 +84,7 @@ class NoteStackView @JvmOverloads constructor(
             }
 
             areChildrenChanged = true
+            
             updateInternalViews()
             requestLayout()
             invalidate()
@@ -95,14 +98,35 @@ class NoteStackView @JvmOverloads constructor(
         val (configAttr, isExpandedAttr) = attributeParser.parse(context, attrs)
         _isExpanded = isExpandedAttr
         this.config = configAttr
+        
+        clipChildren = false
+        clipToPadding = false
 
         collapseButton = createCollapseButton(config.collapseButtonColor)
 
         addView(emptyView)
         addView(collapseButton)
 
+        animator = NoteStackAnimator(this, measurer, layoutManager, config, paddings)
+
         ensureSortedNotes()
         updateInternalViews()
+    }
+
+    fun expand() {
+        if (_isExpanded) return
+        val noteViews = ensureSortedNotes()
+        if (noteViews.size <= 1) return
+
+        animator.expand(noteViews, emptyView, collapseButton)
+    }
+
+    fun collapse() {
+        if (!_isExpanded) return
+        val noteViews = ensureSortedNotes()
+        if (noteViews.isEmpty()) return
+
+        animator.collapse(noteViews, emptyView, collapseButton)
     }
 
     private fun createEmptyView() = LayoutInflater
@@ -214,11 +238,11 @@ class NoteStackView @JvmOverloads constructor(
         else
             GONE
 
-        collapseButton.visibility = if (_isExpanded && notes.size > 1)
-            VISIBLE
-        else
-            GONE
-
+        if (_isExpanded && notes.size > 1) {
+            collapseButton.visibility = VISIBLE
+        } else if (notes.size <= 1) {
+            collapseButton.visibility = GONE
+        }
     }
 
     companion object {

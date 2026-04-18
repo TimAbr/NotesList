@@ -1,17 +1,24 @@
-package com.example.noteslist.presentation.notes_list.recycler_view
+package com.example.noteslist.presentation.common.date_formatter
 
 import android.content.Context
 import com.example.noteslist.R
-import com.example.noteslist.presentation.notes_list.NoteDateFormatter
+import com.example.noteslist.presentation.di.DatePattern
+import com.example.noteslist.presentation.di.RelativeDate
+import dagger.hilt.android.qualifiers.ApplicationContext
+import dagger.hilt.components.SingletonComponent
+import it.czerwinski.android.hilt.annotations.BoundTo
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
+import javax.inject.Inject
 
-class RelativeDateFormatter(
-    private val context: Context,
-    private val dateFormat: String = DEFAULT_DATE_FORMAT
+@BoundTo(supertype = NoteDateFormatter::class, component = SingletonComponent::class)
+@RelativeDate
+class RelativeDateFormatter @Inject constructor(
+    @ApplicationContext private val context: Context,
+    @DatePattern private val dateFormat: String
 ) : NoteDateFormatter {
 
     private val dateFormatter = DateTimeFormatter.ofPattern(dateFormat)
@@ -20,7 +27,9 @@ class RelativeDateFormatter(
         val targetDate = instant.atZone(SYSTEM_ZONE).toLocalDate()
         val today = LocalDate.now(SYSTEM_ZONE)
 
-        return when (ChronoUnit.DAYS.between(today, targetDate)) {
+        return when (
+            ChronoUnit.DAYS.between(today, targetDate)
+        ) {
             0L -> context.getString(R.string.date_today)
             -1L -> context.getString(R.string.date_yesterday)
             1L -> context.getString(R.string.date_tomorrow)
@@ -29,11 +38,11 @@ class RelativeDateFormatter(
     }
 
     override fun parse(dateString: String): Instant {
-        return try{
+        return try {
             LocalDate.parse(dateString, dateFormatter)
-            .atStartOfDay(SYSTEM_ZONE)
-            .toInstant()
-        } catch (e: Exception){
+                .atStartOfDay(SYSTEM_ZONE)
+                .toInstant()
+        } catch (e: Exception) {
             throw IllegalArgumentException(
                 "Invalid date format: $dateString. Expected: $dateFormat",
                 e
@@ -42,7 +51,6 @@ class RelativeDateFormatter(
     }
 
     companion object {
-        private const val DEFAULT_DATE_FORMAT = "dd.MM.yyyy"
         private val SYSTEM_ZONE = ZoneId.systemDefault()
     }
 }

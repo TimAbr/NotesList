@@ -1,13 +1,18 @@
-package com.example.noteslist.presentation.notes_list
+package com.example.noteslist.presentation.common.date_formatter
 
+import com.example.noteslist.presentation.di.DateTimePattern
+import dagger.hilt.components.SingletonComponent
+import it.czerwinski.android.hilt.annotations.BoundTo
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
+import javax.inject.Inject
 
-class NoteDateFormatterImpl(
-    private val dateFormat: String = DEFAULT_DATE_FORMAT
+@BoundTo(supertype = NoteDateFormatter::class, component = SingletonComponent::class)
+class NoteDateFormatterImpl @Inject constructor(
+    @DateTimePattern private val dateFormat: String
 ) : NoteDateFormatter {
     private val dateFormatter: DateTimeFormatter
 
@@ -38,7 +43,6 @@ class NoteDateFormatterImpl(
     }
 
     companion object {
-        private const val DEFAULT_DATE_FORMAT = "dd.MM.yyyy HH:mm"
         private val SYSTEM_ZONE = ZoneId.systemDefault()
     }
 }
