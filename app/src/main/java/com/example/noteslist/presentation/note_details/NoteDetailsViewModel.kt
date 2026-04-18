@@ -1,39 +1,48 @@
 package com.example.noteslist.presentation.note_details
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import com.example.noteslist.domain.models.Note
 import com.example.noteslist.domain.usecases.AddNoteUseCase
 import com.example.noteslist.domain.usecases.GetNoteByIdUseCase
 import com.example.noteslist.domain.usecases.UpdateNoteUseCase
-import com.example.noteslist.presentation.common.NoteDateFormatter
+import com.example.noteslist.presentation.common.date_formatter.NoteDateFormatter
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import java.time.Instant
+import javax.inject.Inject
 
-class NoteDetailsViewModel(
-    private val mode: NoteDetailsScreenMode,
+@HiltViewModel
+class NoteDetailsViewModel @Inject constructor(
+    savedStateHandle: SavedStateHandle,
     private val getNoteByIdUseCase: GetNoteByIdUseCase,
     private val addNoteUseCase: AddNoteUseCase,
     private val updateNoteUseCase: UpdateNoteUseCase,
     private val dateFormatter: NoteDateFormatter
 ) : ViewModel() {
 
+    private val mode: NoteDetailsScreenMode = NoteDetailsFragmentArgs
+        .fromSavedStateHandle(savedStateHandle)
+        .mode
+
+    private var initialNote: Note? = null
+
     private val _state = MutableStateFlow(
         when (mode) {
             is NoteDetailsScreenMode.Edit -> {
-                getNoteDetailsState(mode.noteId)
+                val state = getNoteDetailsState(mode.noteId)
+                initialNote = getNoteByIdUseCase(mode.noteId)
+                state
             }
             is NoteDetailsScreenMode.Create -> {
-                NoteDetailsScreenState(
-                    mode = mode
-                )
+                NoteDetailsScreenState(mode = mode)
             }
         }
     )
     val state: StateFlow<NoteDetailsScreenState> = _state.asStateFlow()
-
 
     private fun getNoteDetailsState(noteId: Long): NoteDetailsScreenState {
         val note = getNoteByIdUseCase(noteId)
@@ -49,6 +58,20 @@ class NoteDetailsViewModel(
             )
         }
         return NoteDetailsScreenState()
+    }
+
+    fun isDirty(): Boolean {
+        val currentState = _state.value
+        return if (mode is NoteDetailsScreenMode.Edit) {
+            initialNote?.let { initial ->
+                currentState.title != initial.title ||
+                currentState.text != initial.text ||
+                currentState.isImportant != initial.isImportant ||
+                currentState.isRead != initial.isRead
+            } ?: false
+        } else {
+            currentState.title.isNotBlank() || currentState.text.isNotBlank()
+        }
     }
 
     fun onTitleChange(newTitle: String) {
@@ -77,14 +100,15 @@ class NoteDetailsViewModel(
         when (val mode = currentState.mode) {
             is NoteDetailsScreenMode.Create -> {
                 val newNote = Note(
-                    id = System.currentTimeMillis(),
                     title = currentState.title,
                     text = currentState.text,
-                    timestamp = Instant.now(),
                     isImportant = currentState.isImportant,
                     isRead = currentState.isRead
                 )
-                addNoteUseCase(newNote)
+                val id = addNoteUseCase(newNote)
+                initialNote = newNote
+
+                _state.value = getNoteDetailsState(id)
             }
 
             is NoteDetailsScreenMode.Edit -> {
@@ -97,6 +121,7 @@ class NoteDetailsViewModel(
                     isRead = currentState.isRead
                 )
                 updateNoteUseCase(updatedNote)
+                initialNote = updatedNote
             }
         }
 

@@ -7,7 +7,7 @@ import android.util.AttributeSet
 import android.view.View
 import android.view.ViewOutlineProvider
 import com.example.noteslist.domain.models.Note
-import com.example.noteslist.presentation.common.NoteDateFormatter
+import com.example.noteslist.presentation.common.date_formatter.NoteDateFormatter
 import com.example.noteslist.presentation.notes_list.views.ViewPaddings
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject

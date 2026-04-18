@@ -1,4 +1,4 @@
-package com.example.noteslist.presentation.common
+package com.example.noteslist.presentation.common.date_formatter
 
 import android.content.Context
 import com.example.noteslist.R
