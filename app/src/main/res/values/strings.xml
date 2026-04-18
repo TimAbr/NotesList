@@ -5,4 +5,26 @@
     <string name="date_today">Сегодня</string>
     <string name="date_yesterday">Вчера</string>
     <string name="date_tomorrow">Завтра</string>
+
+    <string name="note_details_title_hint">Заголовок</string>
+    <string name="note_details_text_hint">Текст заметки</string>
+    <string name="note_details_important_label">Важно</string>
+    <string name="note_details_save_add">Добавить</string>
+    <string name="note_details_save_edit">Сохранить</string>
+    <string name="note_details_error_empty">необходимо заполнить</string>
+    <string name="note_details_read_label">Прочитана</string>
+    <string name="note_details_created_at_label">Дата создания: </string>
+    <string name="note_read">Прочитано 📖</string>
+    <string name="note_not_read">Не прочитано 📘</string>
+    <string name="read_toggle_hint">Зажмите, чтобы изменить</string>
+    <string name="edit_note">Редактировать</string>
+    <string name="add_note">Создать</string>
+
+    <string name="select_note_hint">Выберите заметку из списка</string>
+    <string name="exit_dialog_title">Выход</string>
+    <string name="exit_dialog_message">Вы действительно хотите выйти из приложения?</string>
+    <string name="lose_data_dialog_title">Потеря данных</string>
+    <string name="lose_data_dialog_message">Ваши изменения не будут сохранены. Вы действительно хотите закрыть?</string>
+    <string name="dialog_yes">Да</string>
+    <string name="dialog_no">Нет</string>
 </resources>

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <color name="note_unread_header">#1A5A91</color>
+    <color name="note_unread_background">#2A2C2E</color>
+    <color name="note_unread_title">#E2E2E6</color>
+    <color name="note_unread_text">#C4C7C5</color>
+
+    <color name="note_read_all_bg">#45484B</color>
+    <color name="note_read_text">#90939A</color>
+
+    <color name="note_star_color">#FFC107</color>
+    <color name="note_checkmark_color">#66BB6A</color>
+
+    <color name="date_header_background">#24262A</color>
+    <color name="date_header_stroke">#44474E</color>
+    <color name="date_header_text">#C4C7C5</color>
+
+    <color name="theme_primary">@color/note_unread_header</color>
+    <color name="theme_background">#1A1C1E</color>
+    <color name="theme_surface">@color/note_unread_background</color>
+    <color name="theme_on_background">@color/note_unread_title</color>
+    <color name="theme_on_surface">@color/note_unread_title</color>
+    <color name="theme_surface_variant">@color/note_read_all_bg</color>
+    <color name="theme_on_surface_variant">@color/note_read_text</color>
+    <color name="theme_outline">@color/date_header_stroke</color>
+
+    <color name="theme_on_primary">#FFFFFF</color>
+    <color name="theme_primary_container">#00497D</color>
+    <color name="theme_on_primary_container">#DDF1FF</color>
+
+    <color name="theme_secondary">#74B9FF</color>
+    <color name="theme_on_secondary">#002D5C</color>
+    <color name="theme_secondary_container">#004385</color>
+    <color name="theme_on_secondary_container">#D1E4FF</color>
+
+    <color name="theme_error">#FFB4AB</color>
+    <color name="theme_on_error">#690005</color>
+</resources>

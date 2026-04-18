@@ -1,4 +1,4 @@
-package com.example.noteslist.presentation.notes_list
+package com.example.noteslist.presentation.common.date_formatter
 
 import java.time.Instant
 
