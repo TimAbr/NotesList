@@ -5,7 +5,7 @@ import com.example.noteslist.domain.repositories.NotesRepository
 import javax.inject.Inject
 
 class GetNoteByIdUseCase @Inject constructor(private val repository: NotesRepository) {
-    operator fun invoke(id: Long): Note? {
+    suspend operator fun invoke(id: Long): Note? {
         return repository.getAllNotes().find { it.id == id }
     }
 }

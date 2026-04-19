@@ -5,7 +5,7 @@ import com.example.noteslist.domain.repositories.NotesRepository
 import javax.inject.Inject
 
 class GetAllNotesUseCase @Inject constructor(private val repository: NotesRepository) {
-    operator fun invoke(): List<Note> {
+    suspend operator fun invoke(): List<Note> {
         return repository.getAllNotes()
     }
 }

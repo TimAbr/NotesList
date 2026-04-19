@@ -5,7 +5,7 @@ import com.example.noteslist.domain.repositories.NotesRepository
 import javax.inject.Inject
 
 class UpdateNoteUseCase @Inject constructor(private val repository: NotesRepository) {
-    operator fun invoke(note: Note) {
+    suspend operator fun invoke(note: Note) {
         repository.updateNote(note)
     }
 }
