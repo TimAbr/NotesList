@@ -27,4 +27,5 @@
     <string name="lose_data_dialog_message">Ваши изменения не будут сохранены. Вы действительно хотите закрыть?</string>
     <string name="dialog_yes">Да</string>
     <string name="dialog_no">Нет</string>
+    <string name="search_notes_hint">Поиск заметок...</string>
 </resources>
