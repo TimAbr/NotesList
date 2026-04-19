@@ -77,8 +77,7 @@ fun TimestampLabel(formattedDate: String) {
 @Composable
 fun SaveButton(
     mode: NoteDetailsScreenMode,
-    onSave: () -> Boolean,
-    onBack: () -> Unit
+    onSave: () -> Unit,
 ) {
     val buttonText = if (mode is NoteDetailsScreenMode.Edit) {
         stringResource(R.string.note_details_save_edit)
@@ -87,12 +86,7 @@ fun SaveButton(
     }
 
     Button(
-        onClick = {
-            if (onSave()) {
-
-                onBack()
-            }
-        },
+        onClick = onSave,
         modifier = Modifier.fillMaxWidth()
     ) {
         Text(text = buttonText)

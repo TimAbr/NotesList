@@ -1,5 +1,8 @@
 package com.example.noteslist.presentation.note_details
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -7,6 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -14,8 +18,13 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -39,6 +48,10 @@ fun NoteDetailsScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
+    LaunchedEffect(Unit) {
+        viewModel.navigationFlow.collect { onBack() }
+    }
+
     NoteDetailsBase(
         state = state,
         onTitleChange = viewModel::onTitleChange,
@@ -59,44 +72,69 @@ fun NoteDetailsBase(
     onTextChange: (String) -> Unit,
     onImportantToggle: (Boolean) -> Unit,
     onReadToggle: (Boolean) -> Unit,
-    onSave: () -> Boolean,
+    onSave: () -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier
 ){
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        stringResource(
-                            if (state.mode is NoteDetailsScreenMode.Edit)
-                                R.string.edit_note
-                            else
-                                R.string.add_note
+    Box(modifier = modifier.fillMaxSize()) {
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = {
+                        Text(
+                            stringResource(
+                                if (state.mode is NoteDetailsScreenMode.Edit)
+                                    R.string.edit_note
+                                else
+                                    R.string.add_note
+                            )
                         )
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_back_note_details),
-                            contentDescription = "Back"
-                        )
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = onBack) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_back_note_details),
+                                contentDescription = "Back"
+                            )
+                        }
                     }
-                }
+                )
+            }
+        ) { paddingValues ->
+            NoteDetailsContent(
+                state = state,
+                onTitleChange = onTitleChange,
+                onTextChange = onTextChange,
+                onImportantToggle = onImportantToggle,
+                onReadToggle = onReadToggle,
+                onSave = onSave,
+                modifier = Modifier.padding(paddingValues),
+                onBack = onBack
             )
         }
-    ) { paddingValues ->
-        NoteDetailsContent(
-            state = state,
-            onTitleChange = onTitleChange,
-            onTextChange = onTextChange,
-            onImportantToggle = onImportantToggle,
-            onReadToggle = onReadToggle,
-            onSave = onSave,
-            modifier = modifier.padding(paddingValues),
-            onBack = onBack
-        )
+
+        if (state.isSaving) {
+            SavingOverlay()
+        }
+    }
+}
+
+@Composable
+fun SavingOverlay() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black.copy(alpha = 0.4f))
+            .pointerInput(Unit) {
+                awaitEachGesture {
+                    awaitPointerEvent(pass = PointerEventPass.Initial)
+                        .changes
+                        .forEach { it.consume() }
+                }
+            },
+        contentAlignment = Alignment.Center
+    ) {
+        CircularProgressIndicator()
     }
 }
 
@@ -107,7 +145,7 @@ fun NoteDetailsContent(
     onTextChange: (String) -> Unit,
     onImportantToggle: (Boolean) -> Unit,
     onReadToggle: (Boolean) -> Unit,
-    onSave: () -> Boolean,
+    onSave: () -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -157,7 +195,6 @@ fun NoteDetailsContent(
         SaveButton(
             mode = state.mode,
             onSave = onSave,
-            onBack = onBack
         )
     }
 }
@@ -173,7 +210,7 @@ fun NoteDetailsCreatePreview() {
             onTextChange = {},
             onImportantToggle = {},
             onReadToggle = {},
-            onSave = {true},
+            onSave = {},
             onBack = {},
         )
     }
@@ -197,7 +234,7 @@ fun NoteDetailsEditPreview() {
             onTextChange = {},
             onImportantToggle = {},
             onReadToggle = {},
-            onSave = {true},
+            onSave = {},
             onBack = {},
         )
     }

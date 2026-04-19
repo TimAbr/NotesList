@@ -11,9 +11,11 @@ import com.example.noteslist.presentation.common.date_formatter.NoteDateFormatte
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.Instant
@@ -35,21 +37,24 @@ class NoteDetailsViewModel @Inject constructor(
     private var initialNote: Note? = null
 
     private val _state = MutableStateFlow(
-        when (mode) {
-            is NoteDetailsScreenMode.Edit -> {
+        NoteDetailsScreenState(mode = mode)
+    )
+    
+    init {
+        if (mode is NoteDetailsScreenMode.Edit) {
+            viewModelScope.launch {
                 val state = getNoteDetailsState(mode.noteId)
                 initialNote = getNoteByIdUseCase(mode.noteId)
-                state
-            }
-
-            is NoteDetailsScreenMode.Create -> {
-                NoteDetailsScreenState(mode = mode)
+                _state.value = state
             }
         }
-    )
+    }
     val state: StateFlow<NoteDetailsScreenState> = _state.asStateFlow()
 
-    private fun getNoteDetailsState(noteId: Long): NoteDetailsScreenState {
+    private val _navigationChannel = Channel<Unit>(Channel.BUFFERED)
+    val navigationFlow = _navigationChannel.receiveAsFlow()
+
+    private suspend fun getNoteDetailsState(noteId: Long): NoteDetailsScreenState {
         val note = getNoteByIdUseCase(noteId)
         if (note != null) {
             return NoteDetailsScreenState(
@@ -67,7 +72,7 @@ class NoteDetailsViewModel @Inject constructor(
 
     fun isDirty(): Boolean {
         val currentState = _state.value
-        return if (mode is NoteDetailsScreenMode.Edit) {
+        return if (currentState.mode is NoteDetailsScreenMode.Edit) {
             initialNote?.let { initial ->
                 currentState.title != initial.title ||
                         currentState.text != initial.text ||
@@ -112,42 +117,49 @@ class NoteDetailsViewModel @Inject constructor(
         _state.update { it.copy(isRead = read) }
     }
 
-    fun onSave(): Boolean {
+    fun onSave() {
         val currentState = _state.value
         if (currentState.title.isBlank()) {
             _state.update { it.copy(titleError = TitleValidationError.EMPTY) }
-            return false
+            return
         }
 
-        when (val mode = currentState.mode) {
-            is NoteDetailsScreenMode.Create -> {
-                val newNote = Note(
-                    title = currentState.title,
-                    text = currentState.text,
-                    isImportant = currentState.isImportant,
-                    isRead = currentState.isRead
-                )
-                val id = addNoteUseCase(newNote)
-                initialNote = newNote
+        viewModelScope.launch {
+            _state.update { it.copy(isSaving = true) }
 
-                _state.value = getNoteDetailsState(id)
+            when (val mode = currentState.mode) {
+                is NoteDetailsScreenMode.Create -> {
+                    val newNote = Note(
+                        title = currentState.title,
+                        text = currentState.text,
+                        isImportant = currentState.isImportant,
+                        isRead = currentState.isRead
+                    )
+                    val id = addNoteUseCase(newNote)
+                    val insertedNote = getNoteByIdUseCase(id)
+                    if (insertedNote != null) {
+                        initialNote = insertedNote
+                        _state.value = getNoteDetailsState(id)
+                    }
+                }
+
+                is NoteDetailsScreenMode.Edit -> {
+                    val updatedNote = Note(
+                        id = mode.noteId,
+                        title = currentState.title,
+                        text = currentState.text,
+                        timestamp = currentState.creationTimestamp ?: Instant.now(),
+                        isImportant = currentState.isImportant,
+                        isRead = currentState.isRead
+                    )
+                    updateNoteUseCase(updatedNote)
+                    initialNote = updatedNote
+                }
             }
 
-            is NoteDetailsScreenMode.Edit -> {
-                val updatedNote = Note(
-                    id = mode.noteId,
-                    title = currentState.title,
-                    text = currentState.text,
-                    timestamp = currentState.creationTimestamp ?: Instant.now(),
-                    isImportant = currentState.isImportant,
-                    isRead = currentState.isRead
-                )
-                updateNoteUseCase(updatedNote)
-                initialNote = updatedNote
-            }
+            _state.update { it.copy(isSaving = false) }
+            _navigationChannel.send(Unit)
         }
-
-        return true
     }
 
     companion object {
@@ -163,7 +175,8 @@ data class NoteDetailsScreenState(
     val creationTimestamp: Instant? = null,
     val formattedDate: String = "",
     val titleError: TitleValidationError? = null,
-    val mode: NoteDetailsScreenMode = NoteDetailsScreenMode.Create
+    val mode: NoteDetailsScreenMode = NoteDetailsScreenMode.Create,
+    val isSaving: Boolean = false,
 )
 
 enum class TitleValidationError {

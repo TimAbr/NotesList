@@ -109,13 +109,6 @@ class NotesListViewModel @Inject constructor(
         object ScrollToTop : ViewEffect()
     }
 
-
-    fun onNoteClick(id: Long) {
-        val note = cachedNotes.find { it.id == id } ?: return
-        val updatedNote = note.copy(isRead = !note.isRead)
-        updateNoteUseCase(updatedNote)
-    }
-
     fun onStackClick(key: NoteStackKey) {
         stateManager.toggle(key)
         mapList(cachedNotes)
