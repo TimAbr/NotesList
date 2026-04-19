@@ -2,11 +2,17 @@ package com.example.noteslist.presentation.notes_list
 
 import android.os.Bundle
 import android.view.View
+import android.view.ViewGroup
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
+import androidx.core.view.updatePadding
+import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.noteslist.R
@@ -19,7 +25,8 @@ import com.example.noteslist.presentation.notes_list.recycler_view.delegates.Not
 import com.example.noteslist.presentation.notes_list.recycler_view.delegates.NoteStackDelegate
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -42,7 +49,86 @@ class NotesListFragment : Fragment(R.layout.fragment_notes_list) {
 
         setupRecyclerView(view)
         setupAddNoteButton(view)
+        setupSearchBar(view)
+        applyWindowInsets(view)
         collectData()
+        observeViewEffects()
+    }
+
+    private fun observeViewEffects() {
+        viewModel.viewEffect
+            .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
+            .onEach { effect ->
+                when (effect) {
+                    is NotesListViewModel.ViewEffect.SaveScroll -> {
+                        viewModel.onScrollStateCaptured(
+                            recyclerView.layoutManager?.onSaveInstanceState()
+                        )
+                    }
+
+                    is NotesListViewModel.ViewEffect.ScrollToTop -> {
+                        recyclerView.post {
+                            recyclerView.scrollToPosition(0)
+                        }
+                    }
+                }
+            }
+            .launchIn(viewLifecycleOwner.lifecycleScope)
+    }
+
+    private fun applyWindowInsets(view: View) {
+        val searchPanelBackground = view.findViewById<View>(R.id.searchPanelBackground)
+        val searchBarContainer = view.findViewById<View>(R.id.searchBarContainer)
+        val recyclerView = view.findViewById<RecyclerView>(R.id.recyclerView)
+        val btnAddNote = view.findViewById<FloatingActionButton>(R.id.btnAddNote)
+
+        ViewCompat.setOnApplyWindowInsetsListener(view) { _, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+
+            val searchBarTopMargin = resources.getDimensionPixelSize(R.dimen.search_bar_top_margin)
+            val searchBarHeight = resources.getDimensionPixelSize(R.dimen.search_bar_height)
+            val searchBarBottomMargin =
+                resources.getDimensionPixelSize(R.dimen.search_bar_bottom_margin)
+            val fabMargin = resources.getDimensionPixelSize(R.dimen.fab_margin)
+
+            searchPanelBackground.updateLayoutParams {
+                height = insets.top + searchBarHeight + searchBarTopMargin + searchBarBottomMargin
+            }
+            searchBarContainer.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                topMargin = insets.top + searchBarTopMargin
+            }
+
+            recyclerView.updatePadding(
+                top = insets.top
+                        + searchBarTopMargin
+                        + searchBarHeight
+                        + searchBarBottomMargin
+            )
+
+            btnAddNote.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                leftMargin = insets.left
+                bottomMargin = insets.bottom + fabMargin
+                rightMargin = insets.right
+            }
+
+            WindowInsetsCompat.CONSUMED
+        }
+    }
+
+
+    private fun setupSearchBar(view: View) {
+        val searchEditText = view.findViewById<android.widget.EditText>(R.id.searchEditText)
+        val btnClearSearch = view.findViewById<View>(R.id.btnClearSearch)
+
+        searchEditText.addTextChangedListener { text ->
+            val query = text?.toString() ?: ""
+            viewModel.onSearchQueryChange(query)
+            btnClearSearch.visibility = if (query.isEmpty()) View.GONE else View.VISIBLE
+        }
+
+        btnClearSearch.setOnClickListener {
+            searchEditText.setText("")
+        }
     }
 
     private fun setupRecyclerView(view: View) {
@@ -96,22 +182,20 @@ class NotesListFragment : Fragment(R.layout.fragment_notes_list) {
     }
 
     private fun collectData() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.items.collect {items ->
-                    adapter?.submitList(items){
-                        val state = viewModel.scrollState
-                        if (state != null && items.isNotEmpty()) {
-
-                            recyclerView.post {
-                                recyclerView.layoutManager?.onRestoreInstanceState(state)
-                                viewModel.scrollState = null
-                            }
+        viewModel.items
+            .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
+            .onEach { items ->
+                adapter?.submitList(items) {
+                    val state = viewModel.scrollState
+                    if (state != null && items.isNotEmpty()) {
+                        recyclerView.post {
+                            recyclerView.layoutManager?.onRestoreInstanceState(state)
+                            viewModel.scrollState = null
                         }
                     }
                 }
             }
-        }
+            .launchIn(viewLifecycleOwner.lifecycleScope)
     }
 
     override fun onDestroyView() {

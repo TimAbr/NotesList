@@ -11,7 +11,11 @@
         android:layout_height="match_parent"
         android:clipToPadding="false"
         android:clipChildren="false"
-        android:padding="16dp" />
+        android:paddingHorizontal="16dp"
+        android:paddingTop="0dp"
+        android:paddingBottom="16dp" />
+
+    <include layout="@layout/view_search_bar" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/btnAddNote"
