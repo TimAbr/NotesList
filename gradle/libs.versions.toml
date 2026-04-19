@@ -14,6 +14,7 @@ hilt = "2.52"
 ksp = "2.0.21-1.0.28"
 hiltExtensions = "1.4.0"
 animationCore = "1.10.6"
+room = "2.6.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -40,6 +41,9 @@ hilt-compiler = { group = "com.google.dagger", name = "hilt-compiler", version.r
 hilt-extensions = { module = "it.czerwinski.android.hilt:hilt-extensions", version.ref = "hiltExtensions" }
 hilt-processor-ksp = { module = "it.czerwinski.android.hilt:hilt-processor-ksp", version.ref = "hiltExtensions" }
 androidx-compose-animation-core = { group = "androidx.compose.animation", name = "animation-core", version.ref = "animationCore" }
+room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
+room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
+room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

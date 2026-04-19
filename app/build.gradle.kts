@@ -68,6 +68,10 @@ dependencies {
     implementation(libs.hilt.extensions)
     ksp(libs.hilt.processor.ksp)
 
+    implementation(libs.room.runtime)
+    implementation(libs.room.ktx)
+    ksp(libs.room.compiler)
+
 
     debugImplementation(libs.androidx.compose.ui.tooling)
 }
