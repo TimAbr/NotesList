@@ -14,11 +14,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.noteslist.R
 import com.example.noteslist.presentation.note_details.NoteDetailsScreenMode
+import com.example.noteslist.presentation.note_details.TitleValidationError
 
 @Composable
 fun NoteTitleInput(
     title: String,
-    isError: Boolean,
+    error: TitleValidationError?,
     onTitleChange: (String) -> Unit
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
@@ -27,12 +28,17 @@ fun NoteTitleInput(
             onValueChange = onTitleChange,
             label = { Text(stringResource(R.string.note_details_title_hint)) },
             singleLine = true,
-            isError = isError,
+            isError = error!=null,
             modifier = Modifier.fillMaxWidth()
         )
-        if (isError) {
+        if (error!=null) {
             Text(
-                text = stringResource(R.string.note_details_error_empty),
+                text = when(error){
+                    TitleValidationError.EMPTY ->
+                        stringResource(R.string.note_details_error_empty)
+                    TitleValidationError.TOO_LONG ->
+                        stringResource(R.string.note_details_error_too_long)
+                },
                 color = MaterialTheme.colorScheme.error,
                 style = MaterialTheme.typography.labelSmall,
                 modifier = Modifier.padding(start = 8.dp, top = 4.dp)

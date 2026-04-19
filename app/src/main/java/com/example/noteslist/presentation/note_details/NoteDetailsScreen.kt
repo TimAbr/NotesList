@@ -121,7 +121,7 @@ fun NoteDetailsContent(
     ) {
         NoteTitleInput(
             title = state.title,
-            isError = state.titleError,
+            error = state.titleError,
             onTitleChange = onTitleChange
         )
 

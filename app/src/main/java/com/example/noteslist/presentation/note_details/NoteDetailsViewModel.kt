@@ -2,16 +2,20 @@ package com.example.noteslist.presentation.note_details
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.noteslist.domain.models.Note
 import com.example.noteslist.domain.usecases.AddNoteUseCase
 import com.example.noteslist.domain.usecases.GetNoteByIdUseCase
 import com.example.noteslist.domain.usecases.UpdateNoteUseCase
 import com.example.noteslist.presentation.common.date_formatter.NoteDateFormatter
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import java.time.Instant
 import javax.inject.Inject
 
@@ -37,6 +41,7 @@ class NoteDetailsViewModel @Inject constructor(
                 initialNote = getNoteByIdUseCase(mode.noteId)
                 state
             }
+
             is NoteDetailsScreenMode.Create -> {
                 NoteDetailsScreenState(mode = mode)
             }
@@ -65,17 +70,34 @@ class NoteDetailsViewModel @Inject constructor(
         return if (mode is NoteDetailsScreenMode.Edit) {
             initialNote?.let { initial ->
                 currentState.title != initial.title ||
-                currentState.text != initial.text ||
-                currentState.isImportant != initial.isImportant ||
-                currentState.isRead != initial.isRead
+                        currentState.text != initial.text ||
+                        currentState.isImportant != initial.isImportant ||
+                        currentState.isRead != initial.isRead
             } ?: false
         } else {
             currentState.title.isNotBlank() || currentState.text.isNotBlank()
         }
     }
 
+    private var validationJob: Job? = null
+
     fun onTitleChange(newTitle: String) {
-        _state.update { it.copy(title = newTitle, titleError = false) }
+        _state.update { it.copy(title = newTitle) }
+
+        validationJob?.cancel()
+
+        viewModelScope.launch(Dispatchers.Default) {
+            _state.update {
+                it.copy(
+                    title = newTitle,
+                    titleError = if (newTitle.length > MAX_TITLE_LENGTH)
+                        TitleValidationError.TOO_LONG
+                    else
+                        null
+
+                )
+            }
+        }
     }
 
     fun onTextChange(newText: String) {
@@ -93,7 +115,7 @@ class NoteDetailsViewModel @Inject constructor(
     fun onSave(): Boolean {
         val currentState = _state.value
         if (currentState.title.isBlank()) {
-            _state.update { it.copy(titleError = true) }
+            _state.update { it.copy(titleError = TitleValidationError.EMPTY) }
             return false
         }
 
@@ -127,6 +149,10 @@ class NoteDetailsViewModel @Inject constructor(
 
         return true
     }
+
+    companion object {
+        private const val MAX_TITLE_LENGTH = 50
+    }
 }
 
 data class NoteDetailsScreenState(
@@ -136,6 +162,11 @@ data class NoteDetailsScreenState(
     val isRead: Boolean = false,
     val creationTimestamp: Instant? = null,
     val formattedDate: String = "",
-    val titleError: Boolean = false,
+    val titleError: TitleValidationError? = null,
     val mode: NoteDetailsScreenMode = NoteDetailsScreenMode.Create
 )
+
+enum class TitleValidationError {
+    EMPTY,
+    TOO_LONG,
+}

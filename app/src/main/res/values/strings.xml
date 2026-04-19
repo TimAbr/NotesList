@@ -11,7 +11,8 @@
     <string name="note_details_important_label">Важно</string>
     <string name="note_details_save_add">Добавить</string>
     <string name="note_details_save_edit">Сохранить</string>
-    <string name="note_details_error_empty">необходимо заполнить</string>
+    <string name="note_details_error_empty">Необходимо заполнить</string>
+    <string name="note_details_error_too_long">Слишком длинный заголовок, нужно сократить</string>
     <string name="note_details_read_label">Прочитана</string>
     <string name="note_details_created_at_label">Дата создания: </string>
     <string name="note_read">Прочитано 📖</string>
