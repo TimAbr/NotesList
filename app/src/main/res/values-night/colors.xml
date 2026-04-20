@@ -38,4 +38,7 @@
 
     <color name="theme_error">#FFB4AB</color>
     <color name="theme_on_error">#690005</color>
+
+    <color name="shimmer_gray_light">#2A2C2E</color>
+    <color name="shimmer_gray_dark">#44474E</color>
 </resources>

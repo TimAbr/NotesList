@@ -38,4 +38,7 @@
 
     <color name="theme_error">#BA1A1A</color>
     <color name="theme_on_error">@color/white</color>
+
+    <color name="shimmer_gray_light">#EEEEEE</color>
+    <color name="shimmer_gray_dark">#DDDDDD</color>
 </resources>

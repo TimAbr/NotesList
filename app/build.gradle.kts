@@ -73,5 +73,7 @@ dependencies {
     ksp(libs.room.compiler)
 
 
+    implementation(libs.shimmer)
+
     debugImplementation(libs.androidx.compose.ui.tooling)
 }
