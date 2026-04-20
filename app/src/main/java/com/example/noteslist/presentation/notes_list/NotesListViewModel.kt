@@ -4,28 +4,26 @@ import android.os.Parcelable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.noteslist.domain.models.Note
-import com.example.noteslist.domain.usecases.notes.ObserveAllNotesUseCase
-import com.example.noteslist.domain.usecases.search.SearchNotesUseCase
-import com.example.noteslist.domain.usecases.notes.UpdateNoteUseCase
-import com.example.noteslist.presentation.notes_list.recycler_view.NoteListItem
-import com.example.noteslist.presentation.notes_list.recycler_view.mapper.NoteListMapper
-import com.example.noteslist.presentation.notes_list.recycler_view.mapper.SearchListMapper
-import com.example.noteslist.presentation.notes_list.recycler_view.mapper.NoteStackKey
-import com.example.noteslist.presentation.notes_list.recycler_view.mapper.NoteStackStateManager
 import com.example.noteslist.domain.usecases.app_status.CompleteFirstLaunchUseCase
 import com.example.noteslist.domain.usecases.app_status.IsFirstLaunchUseCase
+import com.example.noteslist.domain.usecases.notes.ObserveAllNotesUseCase
+import com.example.noteslist.domain.usecases.notes.UpdateNoteUseCase
+import com.example.noteslist.domain.usecases.search.SearchNotesUseCase
+import com.example.noteslist.presentation.notes_list.recycler_view.NoteListItem
+import com.example.noteslist.presentation.notes_list.recycler_view.mapper.NoteListMapper
+import com.example.noteslist.presentation.notes_list.recycler_view.mapper.NoteStackKey
+import com.example.noteslist.presentation.notes_list.recycler_view.mapper.NoteStackStateManager
+import com.example.noteslist.presentation.notes_list.recycler_view.mapper.SearchListMapper
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.async
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -73,7 +71,7 @@ class NotesListViewModel @Inject constructor(
 
     private fun observeNotes() {
 
-        var shouldHandleFirstLaunch = true //isFirstLaunchUseCase()
+        var shouldHandleFirstLaunch = isFirstLaunchUseCase()
         val startTime = System.currentTimeMillis()
 
         combine(
