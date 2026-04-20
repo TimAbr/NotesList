@@ -20,6 +20,7 @@
     <string name="read_toggle_hint">Зажмите, чтобы изменить</string>
     <string name="edit_note">Редактировать</string>
     <string name="add_note">Создать</string>
+    <string name="no_notes_yet">Заметок пока нет</string>
 
     <string name="select_note_hint">Выберите заметку из списка</string>
     <string name="exit_dialog_title">Выход</string>

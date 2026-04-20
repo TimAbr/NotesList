@@ -23,6 +23,7 @@ import com.example.noteslist.presentation.notes_list.recycler_view.NotesAdapter
 import com.example.noteslist.presentation.notes_list.recycler_view.delegates.DateHeaderDelegate
 import com.example.noteslist.presentation.notes_list.recycler_view.delegates.NoteDelegate
 import com.example.noteslist.presentation.notes_list.recycler_view.delegates.NoteStackDelegate
+import com.facebook.shimmer.ShimmerFrameLayout
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.launchIn
@@ -43,16 +44,35 @@ class NotesListFragment : Fragment(R.layout.fragment_notes_list) {
     private val recyclerView: RecyclerView
         get() = _recyclerView!!
 
+    private var _shimmerView: ShimmerFrameLayout? = null
+    private val shimmerView: ShimmerFrameLayout
+        get() = _shimmerView!!
+
+    private var _emptyStateView: View? = null
+    private val emptyStateView: View
+        get() = _emptyStateView!!
+
+    private var _btnAddNote: FloatingActionButton? = null
+    private val btnAddNote: FloatingActionButton
+        get() = _btnAddNote!!
+
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        setupRecyclerView(view)
-        setupAddNoteButton(view)
+        initViews(view)
+        setupRecyclerView()
+        setupAddNoteButton()
         setupSearchBar(view)
         applyWindowInsets(view)
         collectData()
         observeViewEffects()
+    }
+
+    private fun initViews(view: View) {
+        _recyclerView = view.findViewById(R.id.recyclerView)
+        _shimmerView = view.findViewById(R.id.shimmerViewContainer)
+        _emptyStateView = view.findViewById(R.id.emptyStateContainer)
+        _btnAddNote = view.findViewById(R.id.btnAddNote)
     }
 
     private fun observeViewEffects() {
@@ -79,8 +99,6 @@ class NotesListFragment : Fragment(R.layout.fragment_notes_list) {
     private fun applyWindowInsets(view: View) {
         val searchPanelBackground = view.findViewById<View>(R.id.searchPanelBackground)
         val searchBarContainer = view.findViewById<View>(R.id.searchBarContainer)
-        val recyclerView = view.findViewById<RecyclerView>(R.id.recyclerView)
-        val btnAddNote = view.findViewById<FloatingActionButton>(R.id.btnAddNote)
 
         ViewCompat.setOnApplyWindowInsetsListener(view) { _, windowInsets ->
             val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -98,12 +116,10 @@ class NotesListFragment : Fragment(R.layout.fragment_notes_list) {
                 topMargin = insets.top + searchBarTopMargin
             }
 
-            recyclerView.updatePadding(
-                top = insets.top
-                        + searchBarTopMargin
-                        + searchBarHeight
-                        + searchBarBottomMargin
-            )
+            val topOffset = insets.top + searchBarTopMargin + searchBarHeight + searchBarBottomMargin
+
+            recyclerView.updatePadding(top = topOffset)
+            shimmerView.updatePadding(top = topOffset)
 
             btnAddNote.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 leftMargin = insets.left
@@ -131,9 +147,7 @@ class NotesListFragment : Fragment(R.layout.fragment_notes_list) {
         }
     }
 
-    private fun setupRecyclerView(view: View) {
-        _recyclerView = view.findViewById(R.id.recyclerView)
-
+    private fun setupRecyclerView() {
         val layoutManager = LinearLayoutManager(requireContext())
 
         adapter = NotesAdapter(
@@ -155,7 +169,6 @@ class NotesListFragment : Fragment(R.layout.fragment_notes_list) {
         recyclerView.addItemDecoration(NoteSpaceItemDecoration(spacing))
         recyclerView.adapter = adapter
 
-        val btnAddNote = view.findViewById<FloatingActionButton>(R.id.btnAddNote)
         recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 if (dy > 0 && btnAddNote.isShown) {
@@ -167,8 +180,8 @@ class NotesListFragment : Fragment(R.layout.fragment_notes_list) {
         })
     }
 
-    private fun setupAddNoteButton(view: View) {
-        view.findViewById<FloatingActionButton>(R.id.btnAddNote).setOnClickListener {
+    private fun setupAddNoteButton() {
+        btnAddNote.setOnClickListener {
             onAddNoteClick()
         }
     }
@@ -182,30 +195,59 @@ class NotesListFragment : Fragment(R.layout.fragment_notes_list) {
     }
 
     private fun collectData() {
-        viewModel.items
+        viewModel.state
             .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
-            .onEach { items ->
-                adapter?.submitList(items) {
-                    val state = viewModel.scrollState
-                    if (state != null && items.isNotEmpty()) {
+            .onEach { state ->
+                handleUIState(state)
+            }
+            .launchIn(viewLifecycleOwner.lifecycleScope)
+    }
+
+    private fun handleUIState(state: NotesListViewModel.NotesListUIState) {
+        when (state) {
+            is NotesListViewModel.NotesListUIState.Loading -> {
+                shimmerView.visibility = View.VISIBLE
+                shimmerView.startShimmer()
+                recyclerView.visibility = View.GONE
+                emptyStateView.visibility = View.GONE
+            }
+
+            is NotesListViewModel.NotesListUIState.Empty -> {
+                shimmerView.stopShimmer()
+                shimmerView.visibility = View.GONE
+                recyclerView.visibility = View.GONE
+                emptyStateView.visibility = View.VISIBLE
+            }
+
+            is NotesListViewModel.NotesListUIState.Content -> {
+                shimmerView.stopShimmer()
+                shimmerView.visibility = View.GONE
+                recyclerView.visibility = View.VISIBLE
+                emptyStateView.visibility = View.GONE
+
+                adapter?.submitList(state.items) {
+                    val savedScrollState = viewModel.scrollState
+                    if (savedScrollState != null && state.items.isNotEmpty()) {
                         recyclerView.post {
-                            recyclerView.layoutManager?.onRestoreInstanceState(state)
+                            recyclerView.layoutManager?.onRestoreInstanceState(savedScrollState)
                             viewModel.scrollState = null
                         }
                     }
                 }
             }
-            .launchIn(viewLifecycleOwner.lifecycleScope)
+        }
     }
 
     override fun onDestroyView() {
-
         viewModel.scrollState = recyclerView.layoutManager?.onSaveInstanceState()
 
         super.onDestroyView()
 
         adapter = null
         _recyclerView = null
+        _shimmerView = null
+        _emptyStateView = null
+        _btnAddNote = null
     }
 
 }

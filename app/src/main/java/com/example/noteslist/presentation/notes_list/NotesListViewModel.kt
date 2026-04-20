@@ -4,21 +4,25 @@ import android.os.Parcelable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.noteslist.domain.models.Note
-import com.example.noteslist.domain.usecases.ObserveAllNotesUseCase
-import com.example.noteslist.domain.usecases.SearchNotesUseCase
-import com.example.noteslist.domain.usecases.UpdateNoteUseCase
+import com.example.noteslist.domain.usecases.notes.ObserveAllNotesUseCase
+import com.example.noteslist.domain.usecases.search.SearchNotesUseCase
+import com.example.noteslist.domain.usecases.notes.UpdateNoteUseCase
 import com.example.noteslist.presentation.notes_list.recycler_view.NoteListItem
 import com.example.noteslist.presentation.notes_list.recycler_view.mapper.NoteListMapper
 import com.example.noteslist.presentation.notes_list.recycler_view.mapper.SearchListMapper
 import com.example.noteslist.presentation.notes_list.recycler_view.mapper.NoteStackKey
 import com.example.noteslist.presentation.notes_list.recycler_view.mapper.NoteStackStateManager
+import com.example.noteslist.domain.usecases.app_status.CompleteFirstLaunchUseCase
+import com.example.noteslist.domain.usecases.app_status.IsFirstLaunchUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.channels.Channel
@@ -33,11 +37,13 @@ class NotesListViewModel @Inject constructor(
     private val stateManager: NoteStackStateManager,
     private val observeAllNotesUseCase: ObserveAllNotesUseCase,
     private val searchNotesUseCase: SearchNotesUseCase,
-    private val searchMapper: SearchListMapper
+    private val searchMapper: SearchListMapper,
+    private val isFirstLaunchUseCase: IsFirstLaunchUseCase,
+    private val completeFirstLaunchUseCase: CompleteFirstLaunchUseCase,
 ) : ViewModel() {
 
-    private val _items = MutableStateFlow<List<NoteListItem>>(emptyList())
-    val items = _items.asStateFlow()
+    private val _state = MutableStateFlow<NotesListUIState>(NotesListUIState.Loading)
+    val state = _state.asStateFlow()
 
     private val _searchQuery = MutableStateFlow("")
     val searchQuery = _searchQuery.asStateFlow()
@@ -49,18 +55,34 @@ class NotesListViewModel @Inject constructor(
     var scrollState: Parcelable? = null
     private var preSearchScrollState: Parcelable? = null
 
+    private val _stackUpdateTrigger = MutableStateFlow(Unit)
+
+
     init {
-        observeNotes()
+        initScreen()
     }
 
-    @OptIn(FlowPreview::class)
+    private fun initScreen() {
+        viewModelScope.launch {
+            if (isFirstLaunchUseCase()) {
+
+            }
+            observeNotes()
+        }
+    }
+
     private fun observeNotes() {
+
+        var shouldHandleFirstLaunch = true //isFirstLaunchUseCase()
+        val startTime = System.currentTimeMillis()
+
         combine(
             observeAllNotesUseCase(),
             _searchQuery
                 .debounce(300L)
-                .distinctUntilChanged()
-        ) { notes, query ->
+                .distinctUntilChanged(),
+            _stackUpdateTrigger
+        ) { notes, query, _ ->
             cachedNotes = notes
             val filteredNotes = searchNotesUseCase(query, notes)
             val adapterItems = if (query.isBlank()) {
@@ -71,9 +93,29 @@ class NotesListViewModel @Inject constructor(
             adapterItems
         }
         .onEach { adapterItems ->
-            _items.value = adapterItems
+            if (shouldHandleFirstLaunch) {
+                handleFirstLaunch(startTime)
+                shouldHandleFirstLaunch = false
+            }
+
+            _state.value = if (adapterItems.isEmpty() && _searchQuery.value.isEmpty()) {
+                NotesListUIState.Empty
+            } else {
+                NotesListUIState.Content(adapterItems)
+            }
         }
         .launchIn(viewModelScope)
+    }
+
+    private suspend fun handleFirstLaunch(startTime: Long) {
+
+        val currentTime = System.currentTimeMillis()
+        val duration = currentTime - startTime
+        if (duration < SHIMMER_MIN_DURATION_MS) {
+            delay(SHIMMER_MIN_DURATION_MS - duration)
+        }
+
+        completeFirstLaunchUseCase()
     }
 
     fun onSearchQueryChange(query: String) {
@@ -104,18 +146,33 @@ class NotesListViewModel @Inject constructor(
 
     fun getPreSearchScrollState(): Parcelable? = preSearchScrollState
 
+    fun onStackClick(key: NoteStackKey) {
+        stateManager.toggle(key)
+        _stackUpdateTrigger.value = Unit
+    }
+
+
+    private fun mapList(list: List<Note>) {
+        val adapterItems = mapper.mapToAdapterItems(list)
+        _state.value = if (adapterItems.isEmpty() && _searchQuery.value.isEmpty()) {
+            NotesListUIState.Empty
+        } else {
+            NotesListUIState.Content(adapterItems)
+        }
+    }
+
+    sealed class NotesListUIState {
+        object Loading : NotesListUIState()
+        data class Content(val items: List<NoteListItem>) : NotesListUIState()
+        object Empty : NotesListUIState()
+    }
+
     sealed class ViewEffect {
         object SaveScroll : ViewEffect()
         object ScrollToTop : ViewEffect()
     }
 
-    fun onStackClick(key: NoteStackKey) {
-        stateManager.toggle(key)
-        mapList(cachedNotes)
-    }
-
-
-    private fun mapList(list: List<Note>) {
-        _items.value = mapper.mapToAdapterItems(list)
+    companion object {
+        private const val SHIMMER_MIN_DURATION_MS = 500L
     }
 }

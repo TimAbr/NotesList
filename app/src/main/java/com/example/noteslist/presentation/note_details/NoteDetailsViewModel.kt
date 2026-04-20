@@ -4,9 +4,9 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.noteslist.domain.models.Note
-import com.example.noteslist.domain.usecases.AddNoteUseCase
-import com.example.noteslist.domain.usecases.GetNoteByIdUseCase
-import com.example.noteslist.domain.usecases.UpdateNoteUseCase
+import com.example.noteslist.domain.usecases.notes.AddNoteUseCase
+import com.example.noteslist.domain.usecases.notes.GetNoteByIdUseCase
+import com.example.noteslist.domain.usecases.notes.UpdateNoteUseCase
 import com.example.noteslist.presentation.common.date_formatter.NoteDateFormatter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
