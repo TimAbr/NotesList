@@ -12,7 +12,7 @@ class SearchNotesUseCase @Inject constructor(
 
         return notes.asSequence()
             .map { it to matcher.match(query, it.title) }
-            .filter { it.second >= SearchMatcher.Companion.MIN_SIMILARITY_SCORE }
+            .filter { it.second >= SearchMatcher.MIN_SIMILARITY_SCORE }
             .sortedByDescending { it.second }
             .map { it.first }
             .toList()

@@ -17,6 +17,7 @@ import com.example.noteslist.presentation.notes_list.recycler_view.mapper.Search
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
@@ -53,7 +54,9 @@ class NotesListViewModel @Inject constructor(
     var scrollState: Parcelable? = null
     private var preSearchScrollState: Parcelable? = null
 
-    private val _stackUpdateTrigger = MutableStateFlow(Unit)
+    private val _stackUpdateTrigger = MutableSharedFlow<Unit>(replay = 1).apply{
+        tryEmit(Unit)
+    }
 
 
     init {
@@ -146,7 +149,7 @@ class NotesListViewModel @Inject constructor(
 
     fun onStackClick(key: NoteStackKey) {
         stateManager.toggle(key)
-        _stackUpdateTrigger.value = Unit
+        _stackUpdateTrigger.tryEmit(Unit)
     }
 
 
