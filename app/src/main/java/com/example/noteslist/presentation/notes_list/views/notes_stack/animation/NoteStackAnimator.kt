@@ -14,7 +14,6 @@ class NoteStackAnimator(
     private val view: NoteStackView,
     private val measurer: NoteStackViewMeasurer,
     private val layoutManager: NoteStackViewLayoutManager,
-    private val config: NoteStackViewConfig,
     private val paddings: ViewPaddings
 ) {
 
@@ -25,14 +24,15 @@ class NoteStackAnimator(
     fun expand(
         noteViews: List<NoteView>, 
         emptyView: View, 
-        collapseButton: View
+        collapseButton: View,
+        config: NoteStackViewConfig
     ) {
         if (noteViews.isEmpty()) return
 
         val timing = NoteStackAnimationTiming(noteViews.size)
         view.isExpanded = true
 
-        animateContainerSize(noteViews, emptyView, collapseButton, true, timing)
+        animateContainerSize(noteViews, emptyView, collapseButton, true, timing, config)
 
         collapseButton.visibility = View.INVISIBLE
 
@@ -53,22 +53,28 @@ class NoteStackAnimator(
         view.requestLayout()
     }
 
-    fun collapse(noteViews: List<NoteView>, emptyView: View, collapseButton: View) {
+    fun collapse(
+        noteViews: List<NoteView>, 
+        emptyView: View, 
+        collapseButton: View,
+        config: NoteStackViewConfig
+    ) {
         if (noteViews.isEmpty()) return
 
         val timing = NoteStackAnimationTiming(noteViews.size)
-        performCollapse(noteViews, emptyView, collapseButton, timing)
+        performCollapse(noteViews, emptyView, collapseButton, timing, config)
     }
 
     private fun performCollapse(
         noteViews: List<NoteView>,
         emptyView: View,
         collapseButton: View,
-        timing: NoteStackAnimationTiming
+        timing: NoteStackAnimationTiming,
+        config: NoteStackViewConfig
     ) {
         val expandedTops = noteViews.map { it.top }
 
-        val targetHeight = measureTargetHeight(noteViews, emptyView, collapseButton, false)
+        val targetHeight = measureTargetHeight(noteViews, emptyView, collapseButton, false, config)
 
         val initialButtonTop = collapseButton.top
         val buttonHeight = collapseButton.measuredHeight
@@ -113,9 +119,10 @@ class NoteStackAnimator(
         emptyView: View,
         collapseButton: View,
         isExpanded: Boolean,
-        timing: NoteStackAnimationTiming
+        timing: NoteStackAnimationTiming,
+        config: NoteStackViewConfig
     ) {
-        val targetHeight = measureTargetHeight(noteViews, emptyView, collapseButton, isExpanded)
+        val targetHeight = measureTargetHeight(noteViews, emptyView, collapseButton, isExpanded, config)
         sizeAnimator.animate(targetHeight, 0L, timing.totalStackDuration)
     }
 
@@ -123,7 +130,8 @@ class NoteStackAnimator(
         noteViews: List<NoteView>,
         emptyView: View,
         collapseButton: View,
-        isExpanded: Boolean
+        isExpanded: Boolean,
+        config: NoteStackViewConfig
     ): Int {
         return measurer.measure(
             notes = noteViews,

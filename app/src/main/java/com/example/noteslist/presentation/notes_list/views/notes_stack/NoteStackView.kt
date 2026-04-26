@@ -118,7 +118,7 @@ class NoteStackView @JvmOverloads constructor(
         addView(emptyView)
         addView(collapseButton)
 
-        animator = NoteStackAnimator(this, measurer, layoutManager, config, paddings)
+        animator = NoteStackAnimator(this, measurer, layoutManager, paddings)
 
         ensureSortedNotes()
         updateInternalViews()
@@ -129,7 +129,7 @@ class NoteStackView @JvmOverloads constructor(
         val noteViews = ensureSortedNotes()
         if (noteViews.size <= 1) return
 
-        animator.expand(noteViews, emptyView, collapseButton)
+        animator.expand(noteViews, emptyView, collapseButton, config)
     }
 
     fun collapse() {
@@ -137,7 +137,7 @@ class NoteStackView @JvmOverloads constructor(
         val noteViews = ensureSortedNotes()
         if (noteViews.isEmpty()) return
 
-        animator.collapse(noteViews, emptyView, collapseButton)
+        animator.collapse(noteViews, emptyView, collapseButton, config)
     }
 
     private fun createEmptyView() = LayoutInflater
