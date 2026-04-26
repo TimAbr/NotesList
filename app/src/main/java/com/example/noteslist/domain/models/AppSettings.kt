@@ -5,7 +5,7 @@ data class AppSettings(
     val stackMaxVisible: Int,
 ) {
     companion object {
-        const val DEFAULT_STACK_SPACING = 8
+        const val DEFAULT_STACK_SPACING = 20
         const val DEFAULT_STACK_MAX_VISIBLE = 3
         
         fun default() = AppSettings(
