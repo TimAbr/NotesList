@@ -57,7 +57,11 @@
             android:textSize="18sp" />
     </LinearLayout>
 
-    <include layout="@layout/view_search_bar" />
+    <include
+        android:id="@+id/topBar"
+        layout="@layout/view_notes_list_top_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/btnAddNote"

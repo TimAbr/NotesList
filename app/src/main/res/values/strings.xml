@@ -30,4 +30,9 @@
     <string name="dialog_yes">Да</string>
     <string name="dialog_no">Нет</string>
     <string name="search_notes_hint">Поиск заметок...</string>
+    <string name="settings_title">Настройки стопок</string>
+    <string name="settings_stack_spacing">Расстояние между карточками</string>
+    <string name="settings_stack_max_visible">Макс. видимых заметок</string>
+    <string name="settings_reset">Сбросить</string>
+    <string name="settings_save">Сохранить</string>
 </resources>

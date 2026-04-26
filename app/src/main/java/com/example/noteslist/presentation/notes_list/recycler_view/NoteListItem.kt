@@ -9,6 +9,8 @@ sealed class NoteListItem {
     data class NoteStack(
         val notes: List<Note>,
         val isExpanded: Boolean,
-        val key: NoteStackKey
+        val key: NoteStackKey,
+        val stackSpacing: Int,
+        val stackMaxVisible: Int,
     ) : NoteListItem()
 }

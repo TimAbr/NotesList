@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
     <style name="Base.Theme.NotesList" parent="Theme.Material3.DayNight.NoActionBar">
-
         <item name="colorPrimary">@color/theme_primary</item>
         <item name="colorOnPrimary">@color/theme_on_primary</item>
         <item name="colorPrimaryContainer">@color/theme_primary_container</item>
@@ -27,4 +26,34 @@
     </style>
 
     <style name="Theme.NotesList" parent="Base.Theme.NotesList" />
+
+    <style name="ShapeAppearance.App.Slider.Thumb" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
+    </style>
+
+    <style name="Widget.App.Slider" parent="Widget.Material3.Slider">
+        <item name="tickColorActive">?attr/colorOnSurfaceVariant</item>
+        <item name="tickColorInactive">?attr/colorOutline</item>
+
+        <item name="trackHeight">16dp</item>
+
+        <item name="thumbRadius">14dp</item>
+        <item name="thumbWidth">28dp</item>
+        <item name="thumbHeight">28dp</item>
+        <item name="shapeAppearance">@style/ShapeAppearance.App.Slider.Thumb</item>
+        <item name="thumbColor">?attr/colorPrimary</item>
+
+        <item name="thumbTrackGapSize">0dp</item>
+
+        <item name="trackColorActive">?attr/colorPrimary</item>
+        <item name="trackColorInactive">?attr/colorSurfaceVariant</item>
+
+        <item name="haloRadius">0dp</item>
+
+        <item name="android:minHeight">48dp</item>
+        <item name="android:paddingTop">8dp</item>
+        <item name="android:paddingBottom">8dp</item>
+    </style>
+
 </resources>

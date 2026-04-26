@@ -14,10 +14,10 @@ import com.example.noteslist.presentation.notes_list.recycler_view.mapper.NoteLi
 import com.example.noteslist.presentation.notes_list.recycler_view.mapper.NoteStackKey
 import com.example.noteslist.presentation.notes_list.recycler_view.mapper.NoteStackStateManager
 import com.example.noteslist.presentation.notes_list.recycler_view.mapper.SearchListMapper
+import com.example.noteslist.domain.usecases.settings.ObserveAppSettingsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
@@ -25,6 +25,7 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -39,9 +40,12 @@ class NotesListViewModel @Inject constructor(
     private val searchMapper: SearchListMapper,
     private val isFirstLaunchUseCase: IsFirstLaunchUseCase,
     private val completeFirstLaunchUseCase: CompleteFirstLaunchUseCase,
+    private val observeAppSettingsUseCase: ObserveAppSettingsUseCase,
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow<NotesListUIState>(NotesListUIState.Loading)
+    private val _state = MutableStateFlow<NotesListUIState>(
+        NotesListUIState.Loading
+    )
     val state = _state.asStateFlow()
 
     private val _searchQuery = MutableStateFlow("")
@@ -54,26 +58,23 @@ class NotesListViewModel @Inject constructor(
     var scrollState: Parcelable? = null
     private var preSearchScrollState: Parcelable? = null
 
-    private val _stackUpdateTrigger = MutableSharedFlow<Unit>(replay = 1).apply{
-        tryEmit(Unit)
-    }
-
+    private val stackUpdateChannel = Channel<Unit>(Channel.BUFFERED)
 
     init {
+        if (!isFirstLaunchUseCase()){
+            _state.value = NotesListUIState.Content(emptyList())
+        }
+
         initScreen()
     }
 
     private fun initScreen() {
         viewModelScope.launch {
-            if (isFirstLaunchUseCase()) {
-
-            }
             observeNotes()
         }
     }
 
     private fun observeNotes() {
-
         var shouldHandleFirstLaunch = isFirstLaunchUseCase()
         val startTime = System.currentTimeMillis()
 
@@ -82,12 +83,13 @@ class NotesListViewModel @Inject constructor(
             _searchQuery
                 .debounce(300L)
                 .distinctUntilChanged(),
-            _stackUpdateTrigger
-        ) { notes, query, _ ->
+            observeAppSettingsUseCase(),
+            stackUpdateChannel.receiveAsFlow().onStart { emit(Unit) }
+        ) { notes, query, settings, _ ->
             cachedNotes = notes
             val filteredNotes = searchNotesUseCase(query, notes)
             val adapterItems = if (query.isBlank()) {
-                mapper.mapToAdapterItems(filteredNotes)
+                mapper.mapToAdapterItems(filteredNotes, settings)
             } else {
                 searchMapper.mapToAdapterItems(filteredNotes)
             }
@@ -109,7 +111,6 @@ class NotesListViewModel @Inject constructor(
     }
 
     private suspend fun handleFirstLaunch(startTime: Long) {
-
         val currentTime = System.currentTimeMillis()
         val duration = currentTime - startTime
         if (duration < SHIMMER_MIN_DURATION_MS) {
@@ -149,17 +150,7 @@ class NotesListViewModel @Inject constructor(
 
     fun onStackClick(key: NoteStackKey) {
         stateManager.toggle(key)
-        _stackUpdateTrigger.tryEmit(Unit)
-    }
-
-
-    private fun mapList(list: List<Note>) {
-        val adapterItems = mapper.mapToAdapterItems(list)
-        _state.value = if (adapterItems.isEmpty() && _searchQuery.value.isEmpty()) {
-            NotesListUIState.Empty
-        } else {
-            NotesListUIState.Content(adapterItems)
-        }
+        stackUpdateChannel.trySend(Unit)
     }
 
     sealed class NotesListUIState {

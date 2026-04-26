@@ -70,6 +70,7 @@ class NoteStackDelegate(
             notesChanged: Boolean = true
         ) {
             stackView.tag = item.key
+            stackView.updateConfig(item.stackSpacing, item.stackMaxVisible)
             
             if (notesChanged) {
                 stackView.notes = item.notes

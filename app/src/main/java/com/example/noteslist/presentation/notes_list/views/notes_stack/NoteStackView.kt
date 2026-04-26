@@ -29,7 +29,7 @@ class NoteStackView @JvmOverloads constructor(
     private val measurer = NoteStackViewMeasurer()
     private val layoutManager = NoteStackViewLayoutManager()
 
-    private val config: NoteStackViewConfig
+    private var config: NoteStackViewConfig
     private val paddings = ViewPaddings(
         paddingLeft = paddingLeft,
         paddingTop = paddingTop,
@@ -39,6 +39,17 @@ class NoteStackView @JvmOverloads constructor(
 
     private val animator: NoteStackAnimator
     private var _isExpanded = false
+
+    fun updateConfig(spacing: Int, maxVisible: Int) {
+        if (config.stackSpacing == spacing && config.stackMaxVisible == maxVisible) return
+        config = config.copy(
+            stackSpacing = spacing,
+            stackMaxVisible = maxVisible
+        )
+        requestLayout()
+        invalidate()
+    }
+
     var isExpanded
         get() = _isExpanded
         set(value) {

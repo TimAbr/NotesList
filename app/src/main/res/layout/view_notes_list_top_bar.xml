@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <View
+        android:id="@+id/searchPanelBackground"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:background="@drawable/bg_search_gradient" />
+
+    <LinearLayout
+        android:id="@+id/searchRow"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/search_bar_height"
+        android:layout_marginHorizontal="16dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <include
+            android:id="@+id/searchBar"
+            layout="@layout/view_search_bar"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+
+        <ImageButton
+            android:id="@+id/btnSettings"
+            android:layout_width="@dimen/search_bar_height"
+            android:layout_height="@dimen/search_bar_height"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/bg_settings_button_ripple"
+            android:contentDescription="@null"
+            android:padding="12dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_more_vert"
+            app:tint="?attr/colorOnSurface" />
+
+    </LinearLayout>
+
+</FrameLayout>

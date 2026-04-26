@@ -1,5 +1,6 @@
 package com.example.noteslist.presentation.notes_list.recycler_view.mapper
 
+import com.example.noteslist.domain.models.AppSettings
 import com.example.noteslist.domain.models.Note
 import com.example.noteslist.presentation.common.date_formatter.NoteDateFormatter
 import com.example.noteslist.presentation.di.RelativeDate
@@ -12,7 +13,8 @@ class NoteListMapper @Inject constructor(
     private val stateProvider: NoteStackStateProvider
 ) {
     fun mapToAdapterItems(
-        notes: List<Note>
+        notes: List<Note>,
+        settings: AppSettings
     ): List<NoteListItem> {
         val result = mutableListOf<NoteListItem>()
 
@@ -46,7 +48,9 @@ class NoteListMapper @Inject constructor(
                         stateProvider.isExpanded(
                             NoteStackKey(date)
                         ),
-                        NoteStackKey(date)
+                        NoteStackKey(date),
+                        stackSpacing = settings.stackSpacing,
+                        stackMaxVisible = settings.stackMaxVisible
                     )
                 )
             }

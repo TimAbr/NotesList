@@ -74,6 +74,12 @@ class AppNavigator @Inject constructor(
         )
     }
 
+    fun navigateToSettings() {
+        if (!isDestination(R.id.settingsBottomSheet)) {
+            navController.navigate(R.id.settingsBottomSheet)
+        }
+    }
+
     fun handleBackPress(isDataChanged: Boolean = false) {
         when {
             isDetailsOpen() -> handleDetailsBack(isDataChanged)
