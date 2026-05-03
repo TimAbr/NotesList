@@ -16,6 +16,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlin.math.roundToInt
 
 @AndroidEntryPoint
 class SettingsBottomSheetFragment : BottomSheetDialogFragment() {
@@ -58,9 +59,24 @@ class SettingsBottomSheetFragment : BottomSheetDialogFragment() {
             .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
             .onEach { settings ->
                 with(binding) {
-                    val spacingValue = settings.stackSpacing.toFloat()
+                    val rawSpacing = settings.stackSpacing.toFloat()
                         .coerceIn(sliderSpacing.valueFrom, sliderSpacing.valueTo)
+                    
+                    val stepSize = sliderSpacing.stepSize
+                    val spacingValue = if (stepSize > 0) {
+                        (rawSpacing / stepSize).roundToInt() * stepSize
+                    } else {
+                        rawSpacing
+                    }
+                    
                     sliderSpacing.value = spacingValue
+
+                    if (spacingValue.toInt() != settings.stackSpacing) {
+                        viewModel.saveSettings(
+                            spacing = spacingValue.toInt(),
+                            maxVisible = settings.stackMaxVisible
+                        )
+                    }
 
                     val maxVisibleValue = settings.stackMaxVisible.toFloat()
                         .coerceIn(sliderMaxVisible.valueFrom, sliderMaxVisible.valueTo)

@@ -53,9 +53,8 @@ class NoteStackViewAttributeParser {
     }
 
     companion object {
-        private const val SPACING_DEFAULT = 20
+        private const val SPACING_DEFAULT = 16
         private const val MAX_VISIBLE_DEFAULT = 3
-        private const val EXPANDED_GAP_DEFAULT = 30
+        private const val EXPANDED_GAP_DEFAULT = 32
     }
 }
-

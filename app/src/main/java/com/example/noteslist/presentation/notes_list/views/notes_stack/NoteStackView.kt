@@ -257,8 +257,8 @@ class NoteStackView @JvmOverloads constructor(
     }
 
     companion object {
-        private const val PADDING_HORIZONTAL = 20
-        private const val PADDING_VERTICAL = 20
+        private const val PADDING_HORIZONTAL = 16
+        private const val PADDING_VERTICAL = 16
         private const val COLLAPSE_TEMPLATE = "<< %s"
     }
 }
