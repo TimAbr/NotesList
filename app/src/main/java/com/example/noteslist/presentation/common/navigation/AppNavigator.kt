@@ -1,8 +1,10 @@
 package com.example.noteslist.presentation.common.navigation
 
 import android.content.Context
+import android.os.Bundle
 import androidx.appcompat.app.AlertDialog
 import androidx.navigation.NavController
+import androidx.navigation.NavDestination
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.navOptions
 import com.example.noteslist.NavGraphDirections
@@ -40,12 +42,71 @@ class AppNavigator @Inject constructor(
     fun setup() {
         activity.window.decorView.post {
             syncRotationState()
-            
-            if (isMultiPane && isDestination(R.id.notesListFragment)) {
-                navigateToRoot()
-            }
 
-            if (!isMultiPane && isDestination(R.id.emptyFragment)) {
+            if (navController.currentDestination == null) {
+                navController.addOnDestinationChangedListener(object :
+                    NavController.OnDestinationChangedListener {
+                    override fun onDestinationChanged(
+                        controller: NavController,
+                        destination: NavDestination,
+                        arguments: Bundle?
+                    ) {
+                        controller.removeOnDestinationChangedListener(this)
+                        handleRotationStateChange()
+                    }
+                })
+            } else {
+                handleRotationStateChange()
+            }
+        }
+    }
+
+    private fun handleRotationStateChange() {
+        val currentDestId = navController.currentDestination?.id ?: return
+
+        if (currentDestId == R.id.settingsBottomSheet) {
+            handleSettingsOnTopRotation()
+        } else {
+            handleGeneralRotation(currentDestId)
+        }
+    }
+
+    private fun handleSettingsOnTopRotation() {
+        val graphId = navController.graph.id
+        if (!isMultiPane) {
+            val hasDetails = hasDestinationInStack(R.id.noteDetailsFragment)
+            val hasPlaceholder = hasDestinationInStack(R.id.emptyFragment)
+
+            if (hasDetails) {
+                navController.popBackStack()
+            } else if (hasPlaceholder) {
+                navController.navigate(R.id.notesListFragment, null, navOptions {
+                    popUpTo(graphId) { inclusive = true }
+                })
+                navController.navigate(R.id.settingsBottomSheet)
+            }
+        } else {
+            if (hasDestinationInStack(R.id.notesListFragment)) {
+                navController.navigate(R.id.emptyFragment, null, navOptions {
+                    popUpTo(graphId) { inclusive = true }
+                })
+                navController.navigate(R.id.settingsBottomSheet)
+            }
+        }
+    }
+
+    private fun handleGeneralRotation(currentId: Int) {
+        if (isMultiPane) {
+            if (currentId == R.id.notesListFragment) {
+                navigateToRoot()
+            } else if (
+                currentId == R.id.emptyFragment &&
+                hasDestinationInStack(R.id.settingsBottomSheet)
+            ) {
+                navController.popBackStack(R.id.settingsBottomSheet, false)
+            }
+        } else {
+            if (currentId == R.id.emptyFragment) {
                 navigateToRoot()
             }
         }
@@ -107,23 +168,33 @@ class AppNavigator @Inject constructor(
 
     private fun navigateToRoot() {
         val rootId = if (isMultiPane) R.id.emptyFragment else R.id.notesListFragment
-        if (!navController.popBackStack(rootId, false)) {
-            navController.navigate(rootId, null, navOptions {
-                popUpTo(navController.graph.startDestinationId) { inclusive = true }
-            })
-        }
+        val currentId = navController.currentDestination?.id
+        if (currentId == rootId) return
+
+        navController.navigate(rootId, null, navOptions {
+            popUpTo(navController.graph.id) { inclusive = true }
+        })
     }
 
     private fun isDetailsOpen(): Boolean = isDestination(R.id.noteDetailsFragment)
 
     private fun isAtRoot(): Boolean {
         val currentDest = navController.currentDestination?.id
-        return currentDest == null || 
-               (isMultiPane && currentDest == R.id.emptyFragment) || 
-               (!isMultiPane && currentDest == R.id.notesListFragment)
+        return currentDest == null ||
+                (isMultiPane && currentDest == R.id.emptyFragment) ||
+                (!isMultiPane && currentDest == R.id.notesListFragment)
     }
 
     private fun isDestination(id: Int): Boolean = navController.currentDestination?.id == id
+
+    private fun hasDestinationInStack(id: Int): Boolean {
+        return try {
+            navController.getBackStackEntry(id)
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
 
     private fun showDataLossDialog(onConfirm: () -> Unit) {
         AlertDialog.Builder(activity)
